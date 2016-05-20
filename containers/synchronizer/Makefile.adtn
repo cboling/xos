@@ -1,0 +1,84 @@
+# The following variables can be modified to build alternative images/containers so
+# that a single docker engine can run multiple instances of different XOS instances
+
+ifeq (0,${MAKELEVEL})
+# The docker image prefix
+IMAGE_PREFIX?=xosproject
+# The container name prefix (use something like chip- to customize)
+CONTAINER_PREFIX?=
+DB_CONTAINER_SUFFIX:=xos-db-postgres
+export DB_HOST=xos-database
+export OS_CONTROLLER_IP=10.17.173.1
+export OS_COMPUTE_NODES=os10-compute01.test.adtran.com/10.17.173.1
+CERTS?=/usr/local/share/ca-certificates:/usr/local/share/ca-certificates:ro
+endif
+
+OS_SYNC_IMAGE_NAME?=${IMAGE_PREFIX}/xos-synchronizer-openstack
+OS_SYNC_CONTAINER_NAME?=${CONTAINER_PREFIX}xos-synchronizer
+NO_DOCKER_CACHE?=
+#NO_DOCKER_CACHE?=--no-cache
+
+OS_COMPUTE_HOST_OPTS=`../../mk-add-hosts-opts.sh ${OS_COMPUTE_NODES}`
+
+######################################################################################
+# Reassign and compute higher level variables to common ones so most of our makefiles look similar
+
+IMAGE:=${OS_SYNC_IMAGE_NAME}
+CONTAINER:=${OS_SYNC_CONTAINER_NAME}
+SQL_SERVER_IP:=$(shell docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_PREFIX}${DB_CONTAINER_SUFFIX} 2>/dev/null)
+SQL_SERVER_PORT:=$(shell ../../getDbDockerPort.sh ${CONTAINER_PREFIX}${DB_CONTAINER_SUFFIX})
+
+######################################################################################
+# Build only if it does not exist
+
+IS_BUILT := $(shell docker images | grep --color=never ^${IMAGE}\\s >/dev/null 2>&1 && echo 1 || echo 0)
+ifeq ($(IS_BUILT), 1)
+	BUILD_CMD:=@echo "${IMAGE} has already been built"
+else
+	BUILD_CMD:=docker build ${NO_DOCKER_CACHE} --rm=true -t ${IMAGE} .
+endif
+
+######################################################################################
+# Run only if it is not already running.
+
+ifeq ($(IS_BUILT), 1)
+IS_RUNNING := $(shell docker ps | grep --color=never \\s${CONTAINER}$ >/dev/null 2>&1 && echo 1 || echo 0)
+ifeq ($(IS_RUNNING), 1)
+	RUN_CMD:=@echo "${CONTAINER} is already running"
+else
+	RUN_CMD:=docker run -d --name ${CONTAINER} -v ${CERTS} \
+		--add-host=${DB_HOST}:${SQL_SERVER_IP} \
+		${OS_COMPUTE_HOST_OPTS} \
+		--add-host=os-controller:${OS_CONTROLLER_IP} ${IMAGE}
+endif
+else
+	RUN_CMD:=@echo "${IMAGE} has not been built"
+endif
+
+######################################################################################
+
+.PHONY: build
+build:
+	${BUILD_CMD}
+
+.PHONY: run
+run:
+	@echo "The Database is running on IP address: ${SQL_SERVER_IP}:${SQL_SERVER_PORT}"
+	${RUN_CMD}
+
+.PHONY: start
+start: ; docker start ${CONTAINER}
+
+.PHONY: stop
+stop: ; docker stop ${CONTAINER}
+
+.PHONY: clean
+clean: clean-container clean-image
+
+.PHONY: clean-container
+clean-container:
+	-sudo docker rm -f ${CONTAINER}
+
+.PHONY: clean-image
+clean-image: clean-container
+	-sudo docker rmi -f ${IMAGE}
