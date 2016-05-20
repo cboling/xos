@@ -32,7 +32,7 @@ the actuall building.
 
 #### Files to edit
 
-1. Edit the *admin-openrs.sh* in the _xos/configurations/adtn-cord_ directory to contain the proper OpenStack
+1. Edit the *admin-openrc.sh* in the _xos/configurations/adtn-cord_ directory to contain the proper OpenStack
  credentials.  This file is used during the creation of the *nodes.yaml* file (primarily to extract compute node names)
  that will be used and the *images.yaml* file for available glance images.
  It is for this reason you should have a working OpenStack installation with loaded images ready to go.  The images
@@ -44,15 +44,15 @@ the actuall building.
    cluster(s), copy the entire XOS tree to a directory (/opt/source/xos/ is a good choice).
 
     $ cd <to-this-directory>
-    $ scp -r ../../.. <user>@<server>:/opt/source/xos/
+    $ scp -r ../../../ <user>@<server>:/opt/source/xos/
 
 2. Log into that remote Ubuntu 14.04 server into an install any build requirements.  All the
    steps here are available in a shell script 'InstallPrerequisites.sh'.
-
+```
     $ sudo ./InstallPrerequisites.sh
-
+```
 or
-
+```
     $ sudo apt-get update
     $ sudo apt-get install -y git curl make wget python-pip apt-transport-https ca-certificates \
                               linux-image-extra-$(uname -r) apparmor
@@ -67,13 +67,13 @@ or
     $ sudo usermod -aG docker $(whoami)
 
     $ sudo pip install docker-compose
-
+```
 4. Build the XOS docker containers. XOS can then be brought up for ADTRAN CORD
    by running a few `make` commands. First, run:
-
-        $ cd /opt/source/xos/configurations/adtn-cord/
-        $ make
-
+```
+    $ cd /opt/source/xos/configurations/adtn-cord/
+    $ make
+```
 After this you will be able to login to the XOS GUI at
 *http://xos/* using username/password `padmin@vicci.org/letmein`.
 Before proceeding, you should verify that objects in XOS are
@@ -84,7 +84,7 @@ at left.  Make sure there is a green check next to `padmin@vicci.org`.
 
 In the same _xos/configurations/adtn-cord_ subdirectory, enter:
 ```
-$ make cord-vaos
+    $ make cord-vaos
 ```
 This will build and run vAOS observer docker container.
 
