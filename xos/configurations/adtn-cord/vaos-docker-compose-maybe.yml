@@ -1,0 +1,127 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: Setup the vAOS Service on this POD
+
+imports:
+   - custom_types/xos.yaml
+   - custom_types/vaos.yaml
+
+node_types:
+    tosca.nodes.VaosService:
+        derived_from: tosca.nodes.Root
+        description: >
+            vAOS Service
+        capabilities:
+            scalable:
+                type: tosca.capabilities.Scalable
+            service:
+                type: tosca.capabilities.xos.Service
+        properties:
+            no-delete:
+                type: boolean
+                default: false
+                description: Do not allow Tosca to delete this object
+            no-create:
+                type: boolean
+                default: false
+                description: Do not allow Tosca to create this object
+            no-update:
+                type: boolean
+                default: false
+                description: Do not allow Tosca to update this object
+            replaces:
+                type: string
+                required: false
+                descrption: Replaces/renames this object
+            kind:
+                type: string
+                default: generic
+                description: Type of service.
+            view_url:
+                type: string
+                required: false
+                description: URL to follow when icon is clicked in the Service Directory.
+            icon_url:
+                type: string
+                required: false
+                description: ICON to display in the Service Directory.
+            enabled:
+                type: boolean
+                default: true
+            published:
+                type: boolean
+                default: true
+                description: If True then display this Service in the Service Directory.
+            public_key:
+                type: string
+                required: false
+                description: Public key to install into Instances to allows Services to SSH into them.
+            private_key_fn:
+                type: string
+                required: false
+                description: Location of private key file
+            versionNumber:
+                type: string
+                required: false
+                description: Version number of Service.
+
+topology_template:
+  node_templates:
+    Private:
+      type: tosca.nodes.NetworkTemplate
+
+    management:
+      type: tosca.nodes.network.Network.XOS
+      properties:
+          no-create: true
+          no-delete: true
+          no-update: true
+
+    ## Networks required by the CORD setup
+    #mysite_vaos-access:
+    #  type: tosca.nodes.network.Network
+    #  properties:
+    #      ip_version: 4
+    #  requirements:
+    #      - network_template:
+    #          node: Private
+    #          relationship: tosca.relationships.UsesNetworkTemplate
+    #      - owner:
+    #          node: mysite_vaos
+    #          relationship: tosca.relationships.MemberOfSlice
+    #      - connection:
+    #          node: mysite_vaos
+    #          relationship: tosca.relationships.ConnectsToSlice
+
+    mysite:
+      type: tosca.nodes.Site
+
+    mysite_vaos:
+      description: This slice holds the vAOS Service
+      type: tosca.nodes.Slice
+      properties:
+          network: noauto
+      requirements:
+          - site:
+              node: mysite
+              relationship: tosca.relationships.MemberOfSite
+          - management:
+              node: management
+              relationship: tosca.relationships.ConnectsToNetwork
+          - exmapleserver:
+              node: service#vaosservice
+              relationship: tosca.relationships.MemberOfService
+
+    service#vaosservice:
+      type: tosca.nodes.VaosService
+      requirements:
+          - management:
+              node: management
+              relationship: tosca.relationships.UsesNetwork
+      properties:
+          view_url: /admin/vaos/vaosservice/$id$/
+          kind: vaosservice
+          public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
+          private_key_fn: /opt/xos/synchronizers/vaos/vaosservice_private_key
+      artifacts:
+          pubkey: /opt/xos/synchronizers/vaos/vaosservice_public_key

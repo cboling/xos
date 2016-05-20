@@ -1,0 +1,81 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: Setup the vAOS Service on the pod
+
+imports:
+   - custom_types/xos.yaml
+   - custom_types/vaosservice.yaml
+
+topology_template:
+  node_templates:
+
+    Private:
+      type: tosca.nodes.NetworkTemplate
+
+    management:
+      type: tosca.nodes.network.Network.XOS
+      properties:
+          no-create: true
+          no-delete: true
+          no-update: true
+
+    vAOS-firewall:
+      type: tosca.nodes.Image
+
+    vaosservice-public:
+      type: tosca.nodes.network.Network
+      properties:
+          ip_version: 4
+      requirements:
+          - network_template:
+              node: Private
+              relationship: tosca.relationships.UsesNetworkTemplate
+          - owner:
+              node: mysite_vaosservice
+              relationship: tosca.relationships.MemberOfSlice
+          - connection:
+              node: mysite_vaosservice
+              relationship: tosca.relationships.ConnectsToSlice
+
+    mysite:
+      type: tosca.nodes.Site
+
+    mysite_vaosservice:
+      description: This slice holds the vAOS Service
+      type: tosca.nodes.Slice
+      properties:
+          network: noauto
+      requirements:
+          - site:
+              node: mysite
+              relationship: tosca.relationships.MemberOfSite
+          - management:
+              node: management
+              relationship: tosca.relationships.ConnectsToNetwork
+          - vaosserver:
+              node: service#vaosservice
+              relationship: tosca.relationships.MemberOfService
+
+    service#vaosservice:
+      type: tosca.nodes.VaosService
+      requirements:
+          - management:
+              node: management
+              relationship: tosca.relationships.UsesNetwork
+      properties:
+          view_url: /admin/vaosservice/vaosservice/$id$/
+          kind: vaosservice
+          public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
+          private_key_fn: /opt/xos/synchronizers/vaos/vaosservice_private_key
+          service_message: hello
+      artifacts:
+          pubkey: /opt/xos/synchronizers/vaos/vaosservice_public_key
+
+    tenant#vaostenant1:
+        type: tosca.nodes.VaosTenant
+        properties:
+            tenant_message: world
+        requirements:
+          - tenant:
+              node: service#vaosservice
+              relationship: tosca.relationships.TenantOfService

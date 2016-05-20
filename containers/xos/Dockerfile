@@ -29,6 +29,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
     python-setuptools \
     tar \
     wget \
+    bash-completion \
+    nano \
 ##### observer dependencies
     python-keystoneclient \
     python-novaclient \
@@ -75,7 +77,7 @@ RUN easy_install \
 ADD http://code.jquery.com/jquery-1.9.1.min.js /usr/local/lib/python2.7/dist-packages/suit/static/suit/js/
 
 # Install XOS
-RUN git clone git://github.com/open-cloud/xos.git /tmp/xos && \
+RUN git clone https://github.com/cboling/xos.git /tmp/xos && \
     mv /tmp/xos/xos /opt/ && \
     chmod +x /opt/xos/tools/xos-manage && \
     /opt/xos/tools/xos-manage genkeys
@@ -88,6 +90,8 @@ EXPOSE 8000
 
 # Set environment variables.
 ENV HOME /root
+ENV PYTHONPATH /usr/local/lib/python2.7/site-packages:/usr/lib/python2.7/dist-packages:/opt/xos:/usr/local/lib/python2.7/site-packages/pydevd
+ENV TERM xterm
 
 # Define working directory.
 WORKDIR /opt/xos
