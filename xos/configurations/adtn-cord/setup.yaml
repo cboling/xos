@@ -22,7 +22,7 @@ topology_template:
               relationship: tosca.relationships.ControllerDeployment
       properties:
           backend_type: OpenStack
-          version: Kilo
+          version: Liberty
           auth_url: { get_script_env: [ SELF, adminrc, OS_AUTH_URL, LOCAL_FILE] }
           admin_user: { get_script_env: [ SELF, adminrc, OS_USERNAME, LOCAL_FILE] }
           admin_password: { get_script_env: [ SELF, adminrc, OS_PASSWORD, LOCAL_FILE] }

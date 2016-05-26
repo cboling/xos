@@ -5,7 +5,7 @@ services:
   xos_db:
     build: ../../../containers/postgresql
     image: xosproject_new/xos-postgres
-    #container_name: postgresql
+    container_name: postgresql
     expose:
         - "5432"
 
@@ -23,6 +23,8 @@ services:
   xos_synchronizer_openstack:
     command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
     build: ../../../containers/synchronizer
+    image: xosproject_new/xos_synchronizer_openstack
+    container_name: xos_synchronizer_openstack
     labels:
         org.xosproject.kind: synchronizer
         org.xosproject.target: openstack
@@ -57,7 +59,7 @@ services:
   xos:
     build: ../../../containers/xos
     image: xosproject_new/xos
-    #container_name: xos
+    container_name: xos
     # Uncomment the next to build the development version
     #dockerfile: Dockerfile.devel
     command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
