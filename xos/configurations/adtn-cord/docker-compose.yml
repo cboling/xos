@@ -1,23 +1,76 @@
-xos_db:
-    image: xosproject/xos-postgres
+###################################################################################
+version: '2'
+###################################################################################
+services:
+  xos_db:
+    build: ../../../containers/postgresql
+    image: xosproject_new/xos-postgres
+    container_name: postgresql
     expose:
         - "5432"
 
-xos_synchronizer_openstack:
-    command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
-    image: xosproject/xos-synchronizer-openstack
-    labels:
-        org.xosproject.kind: synchronizer
-        org.xosproject.target: openstack
+###################################################################################
+# The original xos_db target is commented out below. It pulls a pre-built image
+# down and we may want to build our own until we are sure it is not going to change
+# on us.
+#
+#  xos_db:
+#    image: xosproject/xos-postgres
+#    expose:
+#        - "5432"
+###################################################################################
+  xos:
+    build: ../../../containers/xos
+    image: xosproject_new/xos
+    container_name: xos
+    # Uncomment the next to build the development version
+    #dockerfile: Dockerfile.devel
+    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
     links:
         - xos_db
+    ports:
+        - "80:80"
     volumes:
+        - .:/root/setup:ro
         - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
         - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
-        - .:/root/setup:ro
-        - ./images:/opt/xos/images:ro
+
+###################################################################################
+# Original xos below
+#  xos:
+#    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
+#    image: xosproject/xos
+#    links:
+#        - xos_db
+#    ports:
+#        - "80:80"
+#    volumes:
+#        - .:/root/setup:ro
+#        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
+#        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
+##        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
+##        - ./id_rsa.pub:/opt/xos/synchronizers/onos/onos_key.pub:ro
+##        - ./id_rsa.pub:/opt/xos/synchronizers/vcpe/vcpe_public_key:ro
+##        - ./id_rsa.pub:/opt/xos/synchronizers/monitoring_channel/monitoring_channel_public_key:ro
+
+###################################################################################
+#  xos_synchronizer_openstack:
+#    command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
+#    image: xosproject/xos-synchronizer-openstack
+#    labels:
+#        org.xosproject.kind: synchronizer
+#        org.xosproject.target: openstack
+#    links:
+#        - xos_db
+#    volumes:
+#        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
+#        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
+#        - .:/root/setup:ro
+#        - ./images:/opt/xos/images:ro
 #        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
 
+
+###################################################################################
 #xos_synchronizer_onos:
 #    image: xosproject/xos-synchronizer-openstack
 #    command: bash -c "python /opt/xos/synchronizers/onos/onos-synchronizer.py -C /opt/xos/synchronizers/onos/onos_synchronizer_config"
@@ -85,19 +138,3 @@ xos_synchronizer_openstack:
 #    volumes:
 #        - .:/root/setup:ro
 #        - ./id_rsa:/opt/xos/synchronizers/vtr/vcpe_private_key:ro  # private key
-
-xos:
-    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
-    image: xosproject/xos
-    links:
-        - xos_db
-    ports:
-        - "80:80"
-    volumes:
-        - .:/root/setup:ro
-        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
-        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
-#        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
-#        - ./id_rsa.pub:/opt/xos/synchronizers/onos/onos_key.pub:ro
-#        - ./id_rsa.pub:/opt/xos/synchronizers/vcpe/vcpe_public_key:ro
-#        - ./id_rsa.pub:/opt/xos/synchronizers/monitoring_channel/monitoring_channel_public_key:ro

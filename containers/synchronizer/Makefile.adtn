@@ -18,7 +18,7 @@ OS_SYNC_CONTAINER_NAME?=${CONTAINER_PREFIX}xos-synchronizer
 NO_DOCKER_CACHE?=
 #NO_DOCKER_CACHE?=--no-cache
 
-OS_COMPUTE_HOST_OPTS=`../../mk-add-hosts-opts.sh ${OS_COMPUTE_NODES}`
+OS_COMPUTE_HOST_OPTS=$(shell ../../mk-add-hosts-opts.sh ${OS_COMPUTE_NODES})
 
 ######################################################################################
 # Reassign and compute higher level variables to common ones so most of our makefiles look similar

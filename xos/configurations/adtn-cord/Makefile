@@ -1,8 +1,9 @@
 .PHONY: xos
-xos: up bootstrap
+#xos: up bootstrap
+xos: up
 
 up:
-	sudo docker-compose up -d
+	sudo docker-compose --verbose up -d
 	../common/wait_for_xos_port.sh 80
 
 # TODO: Why is nodes.yaml called twice below.  May be a typo.  Remove one and see if it is actually needed

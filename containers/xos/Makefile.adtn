@@ -17,7 +17,7 @@ GUI_IMAGE_NAME?=${IMAGE_PREFIX}/xos
 GUI_CONTAINER_NAME?=${CONTAINER_PREFIX}xos-server
 NO_DOCKER_CACHE?=
 #NO_DOCKER_CACHE?=--no-cache
-OS_COMPUTE_HOST_OPTS=`../../mk-add-hosts-opts.sh ${OS_COMPUTE_NODES}`
+OS_COMPUTE_HOST_OPTS=$(shell ../../mk-add-hosts-opts.sh ${OS_COMPUTE_NODES})
 
 ######################################################################################
 # Reassign and compute higher level variables to common ones so most of our makefiles look similar
@@ -45,7 +45,7 @@ IS_RUNNING := $(shell docker ps | grep --color=never \\s${CONTAINER}$ >/dev/null
 ifeq ($(IS_RUNNING), 1)
 	RUN_CMD:=@echo "${CONTAINER} is already running"
 else
-	RUN_CMD:=docker run -d --name ${CONTAINER} -p 8000:8000 -v ${CERTS} \
+	RUN_CMD:=docker run -d --name ${CONTAINER} -p 80:8000 -v ${CERTS} \
 		--add-host=${DB_HOST}:${SQL_SERVER_IP} \
 		${OS_COMPUTE_HOST_OPTS} \
 		--add-host=os-controller:${OS_CONTROLLER_IP} ${IMAGE}
