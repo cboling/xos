@@ -5,7 +5,7 @@ services:
   xos_db:
     build: ../../../containers/postgresql
     image: xosproject_new/xos-postgres
-    container_name: postgresql
+    #container_name: postgresql
     expose:
         - "5432"
 
@@ -19,10 +19,45 @@ services:
 #    expose:
 #        - "5432"
 ###################################################################################
+
+  xos_synchronizer_openstack:
+    command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
+    build: ../../../containers/synchronizer
+    labels:
+        org.xosproject.kind: synchronizer
+        org.xosproject.target: openstack
+    links:
+        - xos_db
+    volumes:
+        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
+        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
+        - .:/root/setup:ro
+        - ./images:/opt/xos/images:ro
+        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
+
+###################################################################################
+# The original xos_synchronizer_openstack is below
+#  xos_synchronizer_openstack:
+#    command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
+#    image: xosproject/xos-synchronizer-openstack
+#    labels:
+#        org.xosproject.kind: synchronizer
+#        org.xosproject.target: openstack
+#    links:
+#        - xos_db
+#    volumes:
+#        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
+#        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
+#        - .:/root/setup:ro
+#        - ./images:/opt/xos/images:ro
+#        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
+#
+###################################################################################
+
   xos:
     build: ../../../containers/xos
     image: xosproject_new/xos
-    container_name: xos
+    #container_name: xos
     # Uncomment the next to build the development version
     #dockerfile: Dockerfile.devel
     command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
@@ -34,6 +69,11 @@ services:
         - .:/root/setup:ro
         - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
         - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
+        - ./id_rsa.pub:/opt/xos/synchronizers/vaos/vaos_public_key.pub:ro
+        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
+        - ./id_rsa.pub:/opt/xos/synchronizers/onos/onos_key.pub:ro
+        - ./id_rsa.pub:/opt/xos/synchronizers/vcpe/vcpe_public_key:ro
+        - ./id_rsa.pub:/opt/xos/synchronizers/monitoring_channel/monitoring_channel_public_key:ro
 
 ###################################################################################
 # Original xos below
@@ -52,23 +92,6 @@ services:
 ##        - ./id_rsa.pub:/opt/xos/synchronizers/onos/onos_key.pub:ro
 ##        - ./id_rsa.pub:/opt/xos/synchronizers/vcpe/vcpe_public_key:ro
 ##        - ./id_rsa.pub:/opt/xos/synchronizers/monitoring_channel/monitoring_channel_public_key:ro
-
-###################################################################################
-#  xos_synchronizer_openstack:
-#    command: bash -c "sleep 120; python /opt/xos/synchronizers/openstack/xos-synchronizer.py"
-#    image: xosproject/xos-synchronizer-openstack
-#    labels:
-#        org.xosproject.kind: synchronizer
-#        org.xosproject.target: openstack
-#    links:
-#        - xos_db
-#    volumes:
-#        - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
-#        - ./xos_cord_config:/opt/xos/xos_configuration/xos_cord_config:ro
-#        - .:/root/setup:ro
-#        - ./images:/opt/xos/images:ro
-#        - ../vtn/files/xos_vtn_config:/opt/xos/xos_configuration/xos_vtn_config:ro
-
 
 ###################################################################################
 #xos_synchronizer_onos:
