@@ -1,4 +1,4 @@
-FROM       xosproject/xos
+FROM       adtran/xos
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
     openssh-client \
