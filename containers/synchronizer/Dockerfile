@@ -25,6 +25,11 @@ RUN \
     git -C /opt/ansible/lib/ansible/modules/core pull && \
     git -C /opt/ansible/v2/ansible/modules/core pull
 
+# ADTN: Add tacker python API support
+
+RUN \
+    git clone -b stable/mitaka https://github.com/openstack/python-tackerclient.git /tmp/tacker-client && \
+    cd /tmp/tacker-client; python setup.py install
 
 # For Observer
 RUN mkdir -p /usr/local/share /bin /etc/ansible

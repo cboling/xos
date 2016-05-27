@@ -7,6 +7,8 @@ up:
 
 # TODO: Why is nodes.yaml called twice below.  May be a typo.  Remove one and see if it is actually needed
 bootstrap: nodes.yaml images.yaml
+	@ echo 'Pausing 150 seconds to allow OpenStack observer to start up and make the database fully populate'
+	sleep 150
 	sudo docker-compose run xos python /opt/xos/tosca/run.py none /opt/xos/configurations/common/fixtures.yaml
 	sudo docker-compose run xos python /opt/xos/tosca/run.py none /opt/xos/configurations/common/mydeployment.yaml
 	sudo docker-compose run xos python /opt/xos/tosca/run.py padmin@vicci.org /root/setup/setup.yaml
