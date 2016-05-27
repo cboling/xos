@@ -97,4 +97,4 @@ ENV TERM xterm
 WORKDIR /opt/xos
 
 # Define default command.
-CMD update-ca-certificates && python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
+CMD python /opt/xos/manage.py runserver 0.0.0.0:8000 --insecure --makemigrations
