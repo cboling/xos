@@ -21,12 +21,14 @@ services:
 ###################################################################################
 
   xos:
+    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
     build: ../../../containers/xos
     image: adtran/xos
     #container_name: xos
     # Uncomment the next to build the development version
     #dockerfile: Dockerfile.devel
-    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
+    depends_on:
+        - xos_db
     links:
         - xos_db
     ports:
@@ -66,6 +68,7 @@ services:
     #container_name: xos_synchronizer_openstack
     depends_on:
         - xos
+        - xos_db
     labels:
         com.adtran.kind: synchronizer
         com.adtran.target: openstack
