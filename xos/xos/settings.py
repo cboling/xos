@@ -195,7 +195,7 @@ INSTALLED_APPS = (
     'services.vrouter',
     'services.vtn',
     'services.fabric',
-    # 'services.vaos',                    # ADTN: Added vAOS service
+    'services.vaos',                    # ADTN: Added vAOS service
     'geoposition',
     'rest_framework_swagger',
 )
