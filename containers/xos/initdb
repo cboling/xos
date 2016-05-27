@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME=xosproject/xos
+IMAGE_NAME=adtran/xos
 CONTAINER_NAME=xos_build_helper_$$
 DB_HOST=$(wget http://ipinfo.io/ip -qO -)
 

@@ -17,6 +17,8 @@ config = Config()
 # that the set of overrides will be expanded with need
 def overrideDbSettings(v):
     parsed = urlparse(v)
+    print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+    print('SETTINGS: Parsed DB host hame is %s', parsed.hostname)
     config.db_host = parsed.hostname
     config.db_port = parsed.port
 
