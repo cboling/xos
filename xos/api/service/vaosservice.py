@@ -16,7 +16,7 @@ from xos.apibase import XOSListCreateAPIView, XOSRetrieveUpdateDestroyAPIView, X
 from xos.exceptions import *
 import json
 import subprocess
-from services.vaosservice.models import VaosService
+from services.vaos.models import VaosService
 
 
 class VaosServiceSerializer(PlusModelSerializer):
