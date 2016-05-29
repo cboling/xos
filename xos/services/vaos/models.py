@@ -3,7 +3,7 @@
 from core.models import Service, TenantWithContainer
 from django.db import models, transaction
 
-SERVICE_NAME = 'vaosservice'
+SERVICE_NAME = 'vaos'
 SERVICE_NAME_VERBOSE = 'vAOS Service'
 SERVICE_NAME_VERBOSE_PLURAL = 'vAOS Services'
 TENANT_NAME_VERBOSE = 'vAOS Tenant'
