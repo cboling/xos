@@ -1,3 +1,4 @@
+XOS_PORT?=80
 CONTAINER_NAME:=xos-server
 IMAGE_NAME:=adtran/xos
 TOSCA_CONFIG_PATH:=/opt/xos/configurations/opencloud/opencloud.yaml
@@ -18,7 +19,7 @@ devel: ; cd ../..; ls; sudo docker build -f containers/xos/Dockerfile.devel --no
 test: ; cd ../..; ls; sudo docker build -f containers/xos/Dockerfile.test --no-cache=${NO_DOCKER_CACHE} --rm -t ${IMAGE_NAME} .
 
 .PHONY: run
-run: ; sudo docker run -d --name ${CONTAINER_NAME} -p 80:8000 -v /usr/local/share/ca-certificates:/usr/local/share/ca-certificates:ro ${IMAGE_NAME}
+run: ; sudo docker run -d --name ${CONTAINER_NAME} -p ${XOS_PORT}:8000 -v /usr/local/share/ca-certificates:/usr/local/share/ca-certificates:ro ${IMAGE_NAME}
 
 .PHONY: runtosca
 runtosca: ; sudo docker exec -it ${CONTAINER_NAME} /usr/bin/python /opt/xos/tosca/run.py padmin@vicci.org ${TOSCA_CONFIG_PATH}

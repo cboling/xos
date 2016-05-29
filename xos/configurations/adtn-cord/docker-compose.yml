@@ -21,7 +21,7 @@ services:
 ###################################################################################
 
   xos:
-    command: python /opt/xos/manage.py runserver 0.0.0.0:80 --insecure --makemigrations
+    command: python /opt/xos/manage.py runserver 0.0.0.0:${XOS_PORT} --insecure --makemigrations
     build: ../../../containers/xos
     image: adtran/xos
     #container_name: xos
@@ -33,6 +33,7 @@ services:
         - xos_db
     ports:
         - "80:80"
+        - "8000:8000"
     volumes:
         - .:/root/setup:ro
         - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro

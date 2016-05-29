@@ -1,9 +1,15 @@
+#
+# Change XOS_PORT to an alternate port if you already have an HTTP server on port 80
+#
+export XOS_PORT?= 80
+
 .PHONY: xos
-xos: up bootstrap
+#xos: up bootstrap
+xos: up
 
 up:
-	sudo docker-compose up -d
-	../common/wait_for_xos_port.sh 80
+	docker-compose up -d
+	../common/wait_for_xos_port.sh $(XOS_PORT)
 
 # TODO: Why is nodes.yaml called twice below.  May be a typo.  Remove one and see if it is actually needed
 bootstrap: nodes.yaml images.yaml
