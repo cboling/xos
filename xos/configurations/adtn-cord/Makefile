@@ -4,8 +4,7 @@
 export XOS_PORT?= 80
 
 .PHONY: xos
-#xos: up bootstrap
-xos: up
+xos: up bootstrap
 
 up:
 	docker-compose up -d
