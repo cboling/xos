@@ -22,7 +22,7 @@ topology_template:
     vAOS-firewall:
       type: tosca.nodes.Image
 
-    vaosservice-public:
+    vaos-public:
       type: tosca.nodes.network.Network
       properties:
           ip_version: 4
@@ -31,16 +31,16 @@ topology_template:
               node: Private
               relationship: tosca.relationships.UsesNetworkTemplate
           - owner:
-              node: mysite_vaosservice
+              node: mysite_vaos
               relationship: tosca.relationships.MemberOfSlice
           - connection:
-              node: mysite_vaosservice
+              node: mysite_vaos
               relationship: tosca.relationships.ConnectsToSlice
 
     mysite:
       type: tosca.nodes.Site
 
-    mysite_vaosservice:
+    mysite_vaos:
       description: This slice holds the vAOS Service
       type: tosca.nodes.Slice
       properties:
@@ -53,29 +53,30 @@ topology_template:
               node: management
               relationship: tosca.relationships.ConnectsToNetwork
           - vaosserver:
-              node: service#vaosservice
+              node: service#vaos
               relationship: tosca.relationships.MemberOfService
 
-    service#vaosservice:
+    service#vaos:
       type: tosca.nodes.VaosService
       requirements:
           - management:
               node: management
               relationship: tosca.relationships.UsesNetwork
       properties:
-          view_url: /admin/vaosservice/vaosservice/$id$/
-          kind: vaosservice
+          view_url: /admin/vaos/vaosservice/$id$/
+          kind: vaos
           public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
           private_key_fn: /opt/xos/synchronizers/vaos/vaosservice_private_key
           service_message: hello
       artifacts:
           pubkey: /opt/xos/synchronizers/vaos/vaosservice_public_key
 
-    tenant#vaostenant1:
+    # An example tenant
+    tenant#vaostenant_1:
         type: tosca.nodes.VaosTenant
         properties:
             tenant_message: world
         requirements:
           - tenant:
-              node: service#vaosservice
+              node: service#vaos
               relationship: tosca.relationships.TenantOfService

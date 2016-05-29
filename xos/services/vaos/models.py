@@ -30,11 +30,39 @@ class VaosTenant(TenantWithContainer):
 
     tenant_message = models.CharField(max_length=254, help_text="Tenant Message to Display")
 
+    # default_attributes = {"vlan_id": None, "s_tag": None, "c_tag": None}
+
     def __init__(self, *args, **kwargs):
         vaosservice = VaosService.get_service_objects().all()
         if vaosservice:
             self._meta.get_field('provider_service').default = vaosservice[0].id
         super(VaosTenant, self).__init__(*args, **kwargs)
+
+    # @property
+    # def s_tag(self):
+    #     return self.get_attribute("s_tag", self.default_attributes["s_tag"])
+    #
+    # @s_tag.setter
+    # def s_tag(self, value):
+    #     self.set_attribute("s_tag", value)
+    #
+    # @property
+    # def c_tag(self):
+    #     return self.get_attribute("c_tag", self.default_attributes["c_tag"])
+    #
+    # @c_tag.setter
+    # def c_tag(self, value):
+    #     self.set_attribute("c_tag", value)
+    #
+    # # for now, vlan_id is a synonym for c_tag
+    #
+    # @property
+    # def vlan_id(self):
+    #     return self.c_tag
+    #
+    # @vlan_id.setter
+    # def vlan_id(self, value):
+    #     self.c_tag = value
 
     def save(self, *args, **kwargs):
         super(VaosTenant, self).save(*args, **kwargs)
