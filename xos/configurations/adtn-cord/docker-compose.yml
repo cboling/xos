@@ -118,6 +118,7 @@ services:
     depends_on:
         - xos
         - xos_db
+        - xos_synchronizer_openstack
     labels:
         com.adtran.kind: synchronizer
         com.adtran.target: vaos
