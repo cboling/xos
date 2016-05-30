@@ -22,7 +22,7 @@ topology_template:
     vAOS-firewall:
       type: tosca.nodes.Image
 
-    vaos-public:
+    vaosservice-public:
       type: tosca.nodes.network.Network
       properties:
           ip_version: 4

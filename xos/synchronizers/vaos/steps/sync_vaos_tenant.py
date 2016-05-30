@@ -1,7 +1,7 @@
 import os
 import sys
 from django.db.models import Q, F
-from services.vaos.models import VaosService, VaosTenant
+from services.vaosservice.models import VaosService, VaosTenant
 from synchronizers.base.SyncInstanceUsingAnsible import SyncInstanceUsingAnsible
 
 parentdir = os.path.join(os.path.dirname(__file__), "..")
