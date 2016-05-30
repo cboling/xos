@@ -3,7 +3,8 @@
 from core.models import Service, TenantWithContainer
 from django.db import models, transaction
 
-SERVICE_NAME = 'vaos'
+VCPE_KIND = "vAOS"
+SERVICE_NAME = 'vaosservice'
 SERVICE_NAME_VERBOSE = 'vAOS Service'
 SERVICE_NAME_VERBOSE_PLURAL = 'vAOS Services'
 TENANT_NAME_VERBOSE = 'vAOS Tenant'
@@ -12,7 +13,8 @@ TENANT_NAME_VERBOSE_PLURAL = 'vAOS Tenants'
 
 class VaosService(Service):
 
-    KIND = SERVICE_NAME
+    # KIND = SERVICE_NAME
+    KIND = VCPE_KIND
 
     class Meta:
         app_label = SERVICE_NAME

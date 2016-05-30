@@ -74,7 +74,8 @@ class VaosTenantForm(forms.ModelForm):
         super(VaosTenantForm, self).__init__(*args, **kwargs)
 
         self.fields['kind'].widget.attrs['readonly'] = True
-        self.fields['kind'].initial = SERVICE_NAME
+        self.fields['kind'].initial = VCPE_KIND
+        # self.fields['kind'].initial = SERVICE_NAME
 
         self.fields['provider_service'].queryset = VaosService.get_service_objects().all()
 

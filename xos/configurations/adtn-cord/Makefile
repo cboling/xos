@@ -33,6 +33,12 @@ cord-vaos:
 	sudo docker-compose run xos python /opt/xos/tosca/run.py padmin@vicci.org /root/setup/mgmt-net.yaml
 	sudo docker-compose run xos python /opt/xos/tosca/run.py padmin@vicci.org /root/setup/vaosservice.yaml
 
+cord-dump-data:
+	sudo docker-compose run xos python ./manage.py dumpdata
+
+cord-dump-schema:
+	sudo docker-compose run xos python ./manage.py sqlall
+
 cord-ceilometer: ceilometer_custom_images cord
 	@ echo 'THIS IS CURRENTLY NOT SUPPORTED !!!'
 	sudo docker-compose run xos python /opt/xos/tosca/run.py padmin@vicci.org /root/setup/ceilometer.yaml

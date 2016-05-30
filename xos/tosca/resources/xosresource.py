@@ -87,6 +87,10 @@ class XOSResource(object):
         objs = cls.objects.filter(**kwargs)
         if not objs:
             if throw_exception:
+                self.info("DID NOT FIND A Object %s. HERE IS WHAT WE HAVE" % cls.__name__)
+                self.info("    %s" % cls.objects)
+
+                self.info("deleting %s:%s" % (self.get_model_class_name(), getattr(ro,self.name_field)))
                 raise Exception("Failed to find %s filtered by %s" % (cls.__name__, str(kwargs)))
             return None
         return objs[0]
