@@ -11,7 +11,7 @@ topology_template:
     ########################################################################
     # CORD Services
 
-    service#vaos:
+    service#vaosservice:
       type: tosca.nodes.VaosService
       properties:
           view_url: /admin/cord/voltservice/$id$/

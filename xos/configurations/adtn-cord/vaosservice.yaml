@@ -53,23 +53,23 @@ topology_template:
               node: management
               relationship: tosca.relationships.ConnectsToNetwork
           - vaosserver:
-              node: service#vaos
+              node: service#vaosservice
               relationship: tosca.relationships.MemberOfService
 
-    service#vaos:
+    service#vaosservice:
       type: tosca.nodes.VaosService
       requirements:
           - management:
               node: management
               relationship: tosca.relationships.UsesNetwork
       properties:
-          view_url: /admin/vaos/vaosservice/$id$/
-          kind: vaos
+          view_url: /admin/vaosservice/vaosservice/$id$/
+          kind: vaosservice
           public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
-          private_key_fn: /opt/xos/synchronizers/vaos/vaosservice_private_key
+          private_key_fn: /opt/xos/synchronizers/vaosservice/vaosservice_private_key
           service_message: hello
       artifacts:
-          pubkey: /opt/xos/synchronizers/vaos/vaosservice_public_key
+          pubkey: /opt/xos/synchronizers/vaosservice/vaosservice_public_key
 
     # An example tenant
     tenant#vaostenant_1:
@@ -78,5 +78,5 @@ topology_template:
             tenant_message: world
         requirements:
           - tenant:
-              node: service#vaos
+              node: service#vaosservice
               relationship: tosca.relationships.TenantOfService

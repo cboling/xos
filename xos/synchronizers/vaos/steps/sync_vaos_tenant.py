@@ -13,7 +13,7 @@ class SyncVaosTenant(SyncInstanceUsingAnsible):
     observes = VaosTenant
     requested_interval = 0
     template_name = "vaos_tenant_playbook.yaml"
-    service_key_name = "/opt/xos/synchronizers/vaos/vaos_private_key"
+    service_key_name = "/opt/xos/synchronizers/vaosservice/vaos_private_key"
 
     def __init__(self, *args, **kwargs):
         super(SyncVaosTenant, self).__init__(*args, **kwargs)

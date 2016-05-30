@@ -12,10 +12,10 @@ nova_enabled=True
 
 # Sets options for the synchronizer
 [observer]
-name=vaos
-dependency_graph=/opt/xos/synchronizers/vaos/model-deps
-steps_dir=/opt/xos/synchronizers/vaos/steps
-sys_dir=/opt/xos/synchronizers/vaos/sys
+name=vaosservice
+dependency_graph=/opt/xos/synchronizers/vaosservice/model-deps
+steps_dir=/opt/xos/synchronizers/vaosservice/steps
+sys_dir=/opt/xos/synchronizers/vaosservice/sys
 logfile=/var/log/xos_backend.log
 pretend=False
 backoff_disabled=True

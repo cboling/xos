@@ -34,7 +34,7 @@ class VaosServiceSerializer(PlusModelSerializer):
             return obj.__unicode__()
 
 class VaosServiceViewSet(XOSViewSet):
-    base_name = "vaos"
+    base_name = "vaosservice"
     method_name = "vaosservice"
     method_kind = "viewset"
     queryset = VaosService.get_service_objects().all()
