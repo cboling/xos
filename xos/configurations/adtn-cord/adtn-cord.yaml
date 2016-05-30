@@ -16,11 +16,11 @@ topology_template:
       properties:
           view_url: /admin/cord/voltservice/$id$/
           public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
-          private_key_fn: /opt/xos/synchronizers/vaos/vaos_private_key
+          private_key_fn: /opt/xos/synchronizers/vaosservice/vaos_private_key
           replaces: service_vaos
-          tacker_template: /opt/xos/syncronizers/vaos/
+          tacker_template: /opt/xos/syncronizers/vaosservice/
       artifacts:
-          pubkey: /opt/xos/synchronizers/vaos/vaos_public_key
+          pubkey: /opt/xos/synchronizers/vaosservice/vaos_public_key
 
     Private:
       type: tosca.nodes.NetworkTemplate
@@ -64,7 +64,7 @@ topology_template:
           network: noauto
       requirements:
           - vaos_service:
-              node: service#vaos
+              node: service#vaosservice
               relationship: tosca.relationships.MemberOfService
           - site:
               node: mysite
@@ -105,7 +105,7 @@ topology_template:
 
         requirements:
             - provider_service:
-                node: service#vaos
+                node: service#vaosservice
                 relationship: tosca.relationships.MemberOfService
             - subscriber:
                 node: 123 Main Street

@@ -112,7 +112,7 @@ services:
 ###################################################################################
 
   xos_synchronizer_vaos:
-    command: bash -c "sleep 120; python /opt/xos/synchronizers/vaos/vaos-synchronizer.py"
+    command: bash -c "sleep 120; python /opt/xos/synchronizers/vaosservice/vaos-synchronizer.py"
     #build: ../../../containers/synchronizer
     image: adtran/xos-synchronizer-openstack
     #container_name: xos_synchronizer_vaos
@@ -122,13 +122,13 @@ services:
         - xos_synchronizer_openstack
     labels:
         com.adtran.kind: synchronizer
-        com.adtran.target: vaos
+        com.adtran.target: vaosservice
     links:
         - xos_db
     volumes:
         - .:/root/setup:ro
         - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
-        - ./id_rsa:/opt/xos/synchronizers/vaos/vaos_private_key.pub:ro
+        - ./id_rsa:/opt/xos/synchronizers/vaosservice/vaos_private_key.pub:ro
 
     logging:
       driver: "json-file"

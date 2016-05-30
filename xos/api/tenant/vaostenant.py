@@ -10,7 +10,7 @@ from services.cord.models import CordSubscriberRoot
 from xos.apibase import XOSListCreateAPIView, XOSRetrieveUpdateDestroyAPIView, XOSPermissionDenied
 from api.xosapi_helpers import PlusModelSerializer, XOSViewSet, ReadOnlyField
 
-from services.vaos.models import VaosTenant, VaosService
+from services.vaosservice.models import VaosTenant, VaosService
 
 def get_default_vaos_service():
     services = VaosService.get_service_objects().all()
