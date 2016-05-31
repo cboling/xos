@@ -22,16 +22,17 @@ from services.vaosservice.models import VaosService
 class VaosServiceSerializer(PlusModelSerializer):
         id = ReadOnlyField()
         humanReadableName = serializers.SerializerMethodField("getHumanReadableName")
-        service_message = serializers.CharField(required=False)
+        # service_message = serializers.CharField(required=False)
 
         class Meta:
             model = VaosService
             fields = ('humanReadableName',
-                      'id',
-                      'service_message')
+                      'id')
+                      # 'service_message')
 
         def getHumanReadableName(self, obj):
             return obj.__unicode__()
+
 
 class VaosServiceViewSet(XOSViewSet):
     base_name = "vaosservice"

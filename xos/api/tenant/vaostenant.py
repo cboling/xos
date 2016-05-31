@@ -18,9 +18,11 @@ def get_default_vaos_service():
         return services[0]
     return None
 
+
 class VaosTenantSerializer(PlusModelSerializer):
         id = ReadOnlyField()
-        provider_service = serializers.PrimaryKeyRelatedField(queryset=VaosService.get_service_objects().all(), default=get_default_vaos_service)
+        provider_service = serializers.PrimaryKeyRelatedField(queryset=VaosService.get_service_objects().all(),
+                                                              default=get_default_vaos_service)
         tenant_message = serializers.CharField(required=False)
         backend_status = ReadOnlyField()
 
@@ -28,10 +30,11 @@ class VaosTenantSerializer(PlusModelSerializer):
 
         class Meta:
             model = VaosTenant
-            fields = ('humanReadableName', 'id', 'provider_service', 'tenant_message', 'backend_status')
+            fields = ('humanReadableName', 'id', 'provider_service', 's_tag', 'c_tag', 'backend_status')
 
         def getHumanReadableName(self, obj):
             return obj.__unicode__()
+
 
 class VaosTenantViewSet(XOSViewSet):
     base_name = "vaostenant"
@@ -45,7 +48,7 @@ class VaosTenantViewSet(XOSViewSet):
         patterns = super(VaosTenantViewSet, self).get_urlpatterns(api_path=api_path)
 
         # example to demonstrate adding a custom endpoint
-        patterns.append( self.detail_url("message/$", {"get": "get_message", "put": "set_message"}, "message") )
+        # patterns.append(self.detail_url("s_tag/$", {"get": "get_s_tag", "put": "set_s_tag"}, "s_tag"))
 
         return patterns
 
@@ -56,13 +59,23 @@ class VaosTenantViewSet(XOSViewSet):
 
         return Response(serializer.data)
 
-    def get_message(self, request, pk=None):
+    def get_s_tag(self, request, pk=None):
         tenant = self.get_object()
-        return Response({"tenant_message": tenant.tenant_message})
+        return Response({"s_tag": tenant.s_tag})
 
-    def set_message(self, request, pk=None):
+    def set_s_tag(self, request, pk=None):
         tenant = self.get_object()
-        tenant.tenant_message = request.data["tenant_message"]
+        tenant.s_tag = request.data["s_tag"]
         tenant.save()
-        return Response({"tenant_message": tenant.tenant_message})
+        return Response({"s_tag": tenant.s_tag})
+
+    def get_c_tag(self, request, pk=None):
+        tenant = self.get_object()
+        return Response({"c_tag": tenant.c_tag})
+
+    def set_c_tag(self, request, pk=None):
+        tenant = self.get_object()
+        tenant.c_tag = request.data["c_tag"]
+        tenant.save()
+        return Response({"c_tag": tenant.c_tag})
 

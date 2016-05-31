@@ -28,4 +28,11 @@ node_types:
             tenant_message:
                 type: string
                 required: false
-
+            s_tag:
+                type: string
+                required: false
+                description: s_tag, identifies which olt port
+            c_tag:
+                type: string
+                required: false
+                description: c_tag, identifies which subscriber within s_tag

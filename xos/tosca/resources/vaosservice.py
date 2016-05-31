@@ -11,10 +11,13 @@ from services.vaosservice.models import VaosService
 
 from xosresource import XOSResource
 
+
 class XOSVaosService(XOSResource):
     provides = "tosca.nodes.VaosService"
     xos_model = VaosService
-    copyin_props = ["view_url", "icon_url", "enabled", "published", "public_key", "private_key_fn", "versionNumber", "service_message"]
+    # copyin_props = ["view_url", "icon_url", "enabled", "published", "public_key", "private_key_fn", "versionNumber",
+    #                 "service_message"]
+    copyin_props = ["view_url", "icon_url", "enabled", "published", "public_key", "private_key_fn", "versionNumber"]
 
     def postprocess(self, obj):
         for provider_service_name in self.get_requirements("tosca.relationships.TenantOfService"):

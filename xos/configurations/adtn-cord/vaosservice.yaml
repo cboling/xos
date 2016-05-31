@@ -22,21 +22,6 @@ topology_template:
     vAOS-firewall:
       type: tosca.nodes.Image
 
-    vaosservice-public:
-      type: tosca.nodes.network.Network
-      properties:
-          ip_version: 4
-      requirements:
-          - network_template:
-              node: Private
-              relationship: tosca.relationships.UsesNetworkTemplate
-          - owner:
-              node: mysite_vaos
-              relationship: tosca.relationships.MemberOfSlice
-          - connection:
-              node: mysite_vaos
-              relationship: tosca.relationships.ConnectsToSlice
-
     mysite:
       type: tosca.nodes.Site
 
@@ -52,9 +37,9 @@ topology_template:
           - management:
               node: management
               relationship: tosca.relationships.ConnectsToNetwork
-          - vaosserver:
-              node: service#vaosservice
-              relationship: tosca.relationships.MemberOfService
+#          - vaosservice:
+#              node: service#vaosservice
+#              relationship: tosca.relationships.MemberOfService
 
     service#vaosservice:
       type: tosca.nodes.VaosService
@@ -62,9 +47,15 @@ topology_template:
           - management:
               node: management
               relationship: tosca.relationships.UsesNetwork
+          - owner:
+              node: mysite_vaos
+              relationship: tosca.relationships.MemberOfSlice
       properties:
           view_url: /admin/vaosservice/vaosservice/$id$/
           kind: vaosservice
+          #
+          # The public key is used to allow the service to SSH into the instance
+          #
           public_key: { get_artifact: [ SELF, pubkey, LOCAL_FILE] }
           private_key_fn: /opt/xos/synchronizers/vaosservice/vaosservice_private_key
           service_message: hello
@@ -74,8 +65,14 @@ topology_template:
     # An example tenant
     tenant#vaostenant_1:
         type: tosca.nodes.VaosTenant
+        description: >
+            CORD: A Tenant of the vAOS Service. Each Tenant is tied to a
+            specific vlan_id and instance of vAOS.
         properties:
-            tenant_message: world
+            service_specific_id: 123
+            s_tag: 222
+            c_tag: 111
+
         requirements:
           - tenant:
               node: service#vaosservice

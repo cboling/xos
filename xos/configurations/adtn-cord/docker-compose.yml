@@ -134,6 +134,8 @@ services:
         - ../common/xos_common_config:/opt/xos/xos_configuration/xos_common_config:ro
         - ./id_rsa:/opt/xos/synchronizers/vaosservice/vaosservice_private_key:ro
         - ./id_rsa.pub:/opt/xos/synchronizers/vaosservice/vaosservice_public_key:ro
+        - ./vaos_vnfd_template.yaml:/opt/xos/services/vaosservice/vaos_vnfd_template.yaml:ro
+        - ./vaos_tenant.yaml:/opt/xos/synchronizers/vaosservice/steps/vaos_tenant.yaml:ro
 
     logging:
       driver: "json-file"

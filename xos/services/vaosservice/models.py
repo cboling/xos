@@ -1,6 +1,6 @@
 # models.py -  vAOS Service Models
 
-from core.models import Service, TenantWithContainer
+from core.models import Service, Tenant
 from django.db import models, transaction
 
 SERVICE_NAME = 'vaosservice'
@@ -8,6 +8,9 @@ SERVICE_NAME_VERBOSE = 'vAOS Service'
 SERVICE_NAME_VERBOSE_PLURAL = 'vAOS Services'
 TENANT_NAME_VERBOSE = 'vAOS Tenant'
 TENANT_NAME_VERBOSE_PLURAL = 'vAOS Tenants'
+
+SERVICE_VNFD_TEMPLATE = "/opt/xos/services/vaosservice/vaos_vnfd_template.yaml"
+TENANT_PARAMETER_TEMPLATE = "/opt/xos/synchronizers/vaosservice/steps/vaos_tenant.yaml"
 
 
 class VaosService(Service):
@@ -18,19 +21,29 @@ class VaosService(Service):
         app_label = SERVICE_NAME
         verbose_name = SERVICE_NAME_VERBOSE
 
-    service_message = models.CharField(max_length=254, help_text="Service Message to Display")
+    def __init__(self, *args, **kwargs):
+        self.vnfd_template = SERVICE_VNFD_TEMPLATE
+        self.vnf_parameter_template = TENANT_PARAMETER_TEMPLATE
+        super(VaosService, self).__init__(*args, **kwargs)
+
+    @property
+    def vnfd_template_file(self):
+        return self.vnfd_template
+
+    @property
+    def vnf_parameter_template_file(self):
+        return self.vnf_parameter_template
 
 
-class VaosTenant(TenantWithContainer):
+class VaosTenant(Tenant):
 
     KIND = SERVICE_NAME
 
     class Meta:
         verbose_name = TENANT_NAME_VERBOSE
+        proxy = True
 
-    tenant_message = models.CharField(max_length=254, help_text="Tenant Message to Display")
-
-    # default_attributes = {"vlan_id": None, "s_tag": None, "c_tag": None}
+    default_attributes = {"s_tag": -1, "c_tag": None}
 
     def __init__(self, *args, **kwargs):
         vaosservice = VaosService.get_service_objects().all()
@@ -38,31 +51,21 @@ class VaosTenant(TenantWithContainer):
             self._meta.get_field('provider_service').default = vaosservice[0].id
         super(VaosTenant, self).__init__(*args, **kwargs)
 
-    # @property
-    # def s_tag(self):
-    #     return self.get_attribute("s_tag", self.default_attributes["s_tag"])
-    #
-    # @s_tag.setter
-    # def s_tag(self, value):
-    #     self.set_attribute("s_tag", value)
-    #
-    # @property
-    # def c_tag(self):
-    #     return self.get_attribute("c_tag", self.default_attributes["c_tag"])
-    #
-    # @c_tag.setter
-    # def c_tag(self, value):
-    #     self.set_attribute("c_tag", value)
-    #
-    # # for now, vlan_id is a synonym for c_tag
-    #
-    # @property
-    # def vlan_id(self):
-    #     return self.c_tag
-    #
-    # @vlan_id.setter
-    # def vlan_id(self, value):
-    #     self.c_tag = value
+    @property
+    def s_tag(self):
+        return self.get_attribute("s_tag", self.default_attributes["s_tag"])
+
+    @s_tag.setter
+    def s_tag(self, value):
+        self.set_attribute("s_tag", value)
+
+    @property
+    def c_tag(self):
+        return self.get_attribute("c_tag", self.default_attributes["c_tag"])
+
+    @c_tag.setter
+    def c_tag(self, value):
+        self.set_attribute("c_tag", value)
 
     def save(self, *args, **kwargs):
         super(VaosTenant, self).save(*args, **kwargs)
