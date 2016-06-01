@@ -32,7 +32,7 @@ class VaosTenantSerializer(PlusModelSerializer):
 
         class Meta:
             model = VaosTenant
-            fields = ('humanReadableName', 'id', 'provider_service', 's_tag', 'c_tag', 'backend_status')
+            fields = ('humanReadableName', 'id', 'provider_service', 'service_specific_id', 's_tag', 'c_tag', 'backend_status')
 
         def getHumanReadableName(self, obj):
             return obj.__unicode__()

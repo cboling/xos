@@ -2,6 +2,7 @@
 
 from core.models import Service, Tenant
 from django.db import models, transaction
+from xos.exceptions import *
 
 SERVICE_NAME = 'vaosservice'
 SERVICE_NAME_VERBOSE = 'vAOS Service'
@@ -82,5 +83,5 @@ def model_policy_vaos_tenant(pk):
         if not tenant:
             return
         tenant = tenant[0]
-        tenant.manage_container()
+        #tenant.manage_container()
 
