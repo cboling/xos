@@ -85,6 +85,7 @@ class VaosTenantList(XOSListCreateAPIView):
 
         return super(VaosTenantList, self).post(request, format)
 
+
 class VaosTenantDetail(XOSRetrieveUpdateDestroyAPIView):
     serializer_class = VaosTenantSerializer
     queryset = VaosTenant.get_tenant_objects().select_related().all()

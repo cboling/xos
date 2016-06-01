@@ -73,7 +73,7 @@ class VaosTenant(Tenant):
         model_policy_vaos_tenant(self.pk)
 
     def delete(self, *args, **kwargs):
-        self.cleanup_container()
+        #self.cleanup_container()
         super(VaosTenant, self).delete(*args, **kwargs)
 
 
