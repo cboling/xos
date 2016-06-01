@@ -25,9 +25,6 @@ node_types:
             A Tenant of the vAOS service
         properties:
             xos_base_tenant_props
-            tenant_message:
-                type: string
-                required: false
             s_tag:
                 type: string
                 required: false
