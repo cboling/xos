@@ -14,7 +14,6 @@ class XOSVaosTenant(XOSResource):
     provides = "tosca.nodes.VaosTenant"
     xos_model = VaosTenant
     name_field = "service_specific_id"
-    # copyin_props = ("tenant_message",)
     copyin_props = ["s_tag", "c_tag"]
 
     def get_xos_args(self, throw_exception=True):

@@ -27,22 +27,26 @@ def get_default_vaos_service():
 
 class VaosTenantSerializer(serializers.ModelSerializer, PlusSerializerMixin):
     id = ReadOnlyField()
-    provider_service = serializers.PrimaryKeyRelatedField(queryset=VaosService.get_service_objects().all(),
-                                                          default=get_default_vaos_service)
+    service_specific_id = serializers.CharField()
     s_tag = serializers.CharField()
     c_tag = serializers.CharField()
-    backend_status = ReadOnlyField()
-    # TODO Add later -> computeNodeName = serializers.SerializerMethodField("getComputeNodeName")
+    provider_service = serializers.PrimaryKeyRelatedField(queryset=VaosService.get_service_objects().all(),
+                                                          default=get_default_vaos_service)
 
     humanReadableName = serializers.SerializerMethodField("getHumanReadableName")
+
+    computeNodeName = serializers.SerializerMethodField("getComputeNodeName")
 
     class Meta:
         model = VaosTenant
         fields = ('humanReadableName', 'id', 'provider_service', 'service_specific_id', 's_tag', 'c_tag',
-                  'backend_status')
+                  'computeNodeName')
 
     def getHumanReadableName(self, obj):
         return obj.__unicode__()
+
+    def getComputeNodeName(self, obj):
+        return obj.nodename
 
 
 class VaosTenantList(XOSListCreateAPIView):

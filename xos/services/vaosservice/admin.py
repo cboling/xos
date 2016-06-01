@@ -53,7 +53,7 @@ class VaosServiceAdmin(ReadOnlyAwareAdmin):
     suit_form_tabs = (
         ('general', 'vAOS Service Details', ),
         ('administration', 'Administration'),
-        ('slices', 'Slices',),
+        # ('slices', 'Slices',),
         )
 
     suit_form_includes = (('vaosadmin.html',
@@ -75,17 +75,26 @@ class VaosTenantForm(forms.ModelForm):
     s_tag = forms.CharField()
     c_tag = forms.CharField()
     creator = forms.ModelChoiceField(queryset=User.objects.all())
+    compute_node_name = forms.CharField()
+    instance_id = forms.CharField()
+    instance_name = forms.CharField()
 
     def __init__(self, *args, **kwargs):
         super(VaosTenantForm, self).__init__(*args, **kwargs)
 
         self.fields['kind'].widget.attrs['readonly'] = True
+        self.fields['compute_node_name'].widget.attrs['readonly'] = True
+        self.fields['instance_id'].widget.attrs['readonly'] = True
+        self.fields['instance_name'].widget.attrs['readonly'] = True
         self.fields['provider_service'].queryset = VaosService.get_service_objects().all()
 
         if self.instance:
             self.fields['creator'].initial = self.instance.creator
             self.fields['c_tag'].initial = self.instance.c_tag
             self.fields['s_tag'].initial = self.instance.s_tag
+            self.fields['compute_node_name'].initial = self.instance.compute_node_name
+            self.fields['instance_id'].initial = self.instance.instance_id
+            self.fields['instance_name'].initial = self.instance.instance_name
 
         if (not self.instance) or (not self.instance.pk):
             # default fields for an 'add' form
@@ -106,15 +115,16 @@ class VaosTenantAdmin(ReadOnlyAwareAdmin):
     verbose_name = TENANT_NAME_VERBOSE
     verbose_name_plural = TENANT_NAME_VERBOSE_PLURAL
 
-    list_display = ('id', 'backend_status_icon', 'instance', 'id', 'service_specific_id', 's_tag', 'c_tag')
-    list_display_links = ('backend_status_icon', 'instance', 'id')
+    list_display = ('id', 'backend_status_icon', 'id', 'service_specific_id', 's_tag', 'c_tag')
+    list_display_links = ('backend_status_icon', 'id')
 
     fieldsets = [(None, {
-        'fields': ['backend_status_text', 'kind', 'provider_service', 'instance', 'creator', 'service_specific_id', 's_tag', 'c_tag'],
+        'fields': ['backend_status_text', 'kind', 'provider_service', 'creator',
+                   'service_specific_id', 's_tag', 'c_tag', 'compute_node_name', 'instance_id', 'instance_name'],
         'classes': ['suit-tab suit-tab-general'],
         })]
 
-    readonly_fields = ('backend_status_text', 'instance',)
+    readonly_fields = ('backend_status_text', 'compute_node_name', 'instance_id', 'instance_name')
 
     form = VaosTenantForm
 

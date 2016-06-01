@@ -35,18 +35,16 @@ class VaosTenantForAPI(VaosTenant):
     # def subscriber(self, value):
     #     self.subscriber_root = value # CordSubscriberRoot.get_tenant_objects().get(id=value)
     #
-    # @property
-    # def related(self):
-    #     related = {}
-    #     if self.vcpe:
-    #         related["vsg_id"] = self.vcpe.id
-    #         if self.vcpe.instance:
-    #             related["instance_id"] = self.vcpe.instance.id
-    #             related["instance_name"] = self.vcpe.instance.name
-    #             related["wan_container_ip"] = self.vcpe.wan_container_ip
-    #             if self.vcpe.instance.node:
-    #                 related["compute_node_name"] = self.vcpe.instance.node.name
-    #     return related
+    @property
+    def related(self):
+        related = {}
+        if self.nodename:
+            related["compute_node_name"] = self.nodename
+        if self.instance_id:
+            related["instance_id"] = self.instance_id
+        if self.instance_name:
+            related["instance_name"] = self.instance_name
+        return related
 
 
 class VaosTenantSerializer(serializers.ModelSerializer, PlusSerializerMixin):
@@ -55,15 +53,14 @@ class VaosTenantSerializer(serializers.ModelSerializer, PlusSerializerMixin):
                                                               default=get_default_vaos_service)
         s_tag = serializers.CharField()
         c_tag = serializers.CharField()
-        backend_status = ReadOnlyField()
-        # TODO Add later -> computeNodeName = serializers.SerializerMethodField("getComputeNodeName")
+        related = serializers.DictField(required=False)
 
         humanReadableName = serializers.SerializerMethodField("getHumanReadableName")
 
         class Meta:
             model = VaosTenantForAPI
             fields = ('humanReadableName', 'id', 'provider_service', 'service_specific_id', 's_tag', 'c_tag',
-                      'backend_status')
+                      'related')
 
         def getHumanReadableName(self, obj):
             return obj.__unicode__()

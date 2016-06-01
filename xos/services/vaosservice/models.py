@@ -1,6 +1,6 @@
 # models.py -  vAOS Service Models
 
-from core.models import Service, Tenant
+from core.models import Service, Tenant, User
 from django.db import models, transaction
 from xos.exceptions import *
 
@@ -44,10 +44,18 @@ class VaosTenant(Tenant):
         verbose_name = TENANT_NAME_VERBOSE
         proxy = True
 
-    default_attributes = {"s_tag": -1, "c_tag": None}
+    default_attributes = {
+        "s_tag": -1,
+        "c_tag": None,
+        "compute_node_name": None,
+        "instance_id": None,
+        "instance_name": None,
+    }
 
     def __init__(self, *args, **kwargs):
+        self.cached_creator = None
         vaosservice = VaosService.get_service_objects().all()
+
         if vaosservice:
             self._meta.get_field('provider_service').default = vaosservice[0].id
         super(VaosTenant, self).__init__(*args, **kwargs)
@@ -68,12 +76,59 @@ class VaosTenant(Tenant):
     def c_tag(self, value):
         self.set_attribute("c_tag", value)
 
+    @property
+    def compute_node_name(self):
+        return self.get_attribute("compute_node_name", self.default_attributes["compute_node_name"])
+
+    @compute_node_name.setter
+    def compute_node_name(self, value):
+        self.set_attribute("compute_node_name", value)
+
+    @property
+    def instance_id(self):
+        return self.get_attribute("instance_id", self.default_attributes["instance_id"])
+
+    @instance_id.setter
+    def instance_id(self, value):
+        self.set_attribute("instance_id", value)
+
+    @property
+    def instance_name(self):
+        return self.get_attribute("instance_name", self.default_attributes["instance_name"])
+
+    @instance_name.setter
+    def instance_name(self, value):
+        self.set_attribute("instance_name", value)
+
+    @property
+    def creator(self):
+        if getattr(self, "cached_creator", None):
+            return self.cached_creator
+        creator_id = self.get_attribute("creator_id")
+        if not creator_id:
+            return None
+        users = User.objects.filter(id=creator_id)
+        if not users:
+            return None
+        user = users[0]
+        self.cached_creator = users[0]
+        return user
+
+    @creator.setter
+    def creator(self, value):
+        if value:
+            value = value.id
+        if value != self.get_attribute("creator_id", None):
+            self.cached_creator = None
+
+        self.set_attribute("creator_id", value)
+
     def save(self, *args, **kwargs):
         super(VaosTenant, self).save(*args, **kwargs)
         model_policy_vaos_tenant(self.pk)
 
     def delete(self, *args, **kwargs):
-        #self.cleanup_container()
+        # self.cleanup_container()
         super(VaosTenant, self).delete(*args, **kwargs)
 
 
@@ -82,6 +137,6 @@ def model_policy_vaos_tenant(pk):
         tenant = VaosTenant.objects.select_for_update().filter(pk=pk)
         if not tenant:
             return
-        tenant = tenant[0]
-        #tenant.manage_container()
+        # tenant = tenant[0]
+        # tenant.manage_container()
 
