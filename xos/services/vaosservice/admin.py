@@ -56,10 +56,10 @@ class VaosServiceAdmin(ReadOnlyAwareAdmin):
         ('slices', 'Slices',),
         )
 
-    suit_form_includes = ((
-        'top',
-        'administration'),
-        )
+    suit_form_includes = (('vaosadmin.html',
+                           'top',
+                           'administration'),
+                          )
 
     def queryset(self, request):
         return VaosService.get_service_objects_by_user(request.user)
@@ -80,7 +80,6 @@ class VaosTenantForm(forms.ModelForm):
         super(VaosTenantForm, self).__init__(*args, **kwargs)
 
         self.fields['kind'].widget.attrs['readonly'] = True
-        self.fields['kind'].initial = SERVICE_NAME
         self.fields['provider_service'].queryset = VaosService.get_service_objects().all()
 
         if self.instance:
@@ -89,6 +88,8 @@ class VaosTenantForm(forms.ModelForm):
             self.fields['s_tag'].initial = self.instance.s_tag
 
         if (not self.instance) or (not self.instance.pk):
+            # default fields for an 'add' form
+            self.fields['kind'].initial = SERVICE_NAME
             self.fields['creator'].initial = get_request().user
             if VaosService.get_service_objects().exists():
                 self.fields['provider_service'].initial = VaosService.get_service_objects().all()[0]
