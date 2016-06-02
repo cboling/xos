@@ -20,13 +20,14 @@ logger = Logger(level=logging.INFO)
 
 class SyncInstanceUsingTacker(SyncStep):
     # All of the following should be defined for classes derived from this
-    # base class. Examples below use VSGTenant.
+    # base class. Examples below use VaosTenant.
 
-    # provides=[VSGTenant]
-    # observes=VSGTenant
+    # provides=[VaosTenant]
+    # observes=VaosTenant
     # requested_interval=0
-    # template_name = "sync_vcpetenant.yaml"
-    # service_key_name = "/opt/xos/observers/vcpe/vcpe_private_key"
+    # vnfd_template = ".../vaos_vnfd_template.yaml"
+    # vnf_parameter_template = ".../vaos_tenant.yaml"
+    # service_key_name = "/opt/xos/synchronizers/vaosservice/vaos_private_key"
 
     def __init__(self, **args):
         SyncStep.__init__(self, **args)
