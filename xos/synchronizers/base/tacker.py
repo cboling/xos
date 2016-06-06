@@ -21,7 +21,7 @@ def get_tacker_client(site, timeout=None):
     :param timeout: (integer) Connection timeout, see keystoneclient.v2_0.client module
     :return: (HttpClient) Tacker HTTP API client
 
-    Here is example from CLI
+    Here is example from CLI.  See http://tacker-docs.readthedocs.io/en/latest/devref/mano_api.html
 
     client = construct_http_client(username='admin', password='devstack',
                 tenant_name='admin', auth_url='http://192.168.1.121:5000/v2.0')
