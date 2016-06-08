@@ -160,38 +160,82 @@ def onboard_nfvd(client, file, name):
     Install NFVD
 
     ie)     client.do_request(url='/v1.0/vnfd', method='POST')
-args = {
-    "auth": { "tenantName": "admin", "passwordCredentials": { "username": "admin", "password": "devstack" } },
-    "vnfd": {
-        "attributes": {
-            "vnfd": "template_name:
-            OpenWRT \r\ndescription: OpenWRT router\r\n\r\nservice_properties:\r\n  Id:
-            sample-vnfd\r\n  vendor: tacker\r\n  version: 1\r\n\r\nvdus:\r\n  vdu1:\r\n
-            id: vdu1\r\n    vm_image: cirros-0.3.2-x86_64-uec\r\n    instance_type:
-            m1.tiny\r\n\r\n    network_interfaces:\r\n      management:\r\n        network:
-            net_mgmt\r\n        management: true\r\n      pkt_in:\r\n        network:
-            net0\r\n      pkt_out:\r\n        network: net1\r\n\r\n    placement_policy:
-            \r\n      availability_zone: nova\r\n\r\n    auto-scaling: noop\r\n
-            monitoring_policy: noop\r\n    failure_policy: noop\r\n\r\n    config:\r\n
-            param0: key0\r\n      param1: key1"
-        },
-        "service_types": [
-            {
-                "service_type": "vnfd"
+            request args = {
+                "auth": { "tenantName": "admin", "passwordCredentials": { "username": "admin", "password": "devstack" } },
+                "vnfd": {
+                    "attributes": {
+                        "vnfd": "template_name:
+                                OpenWRT \r\ndescription: OpenWRT router\r\n\r\nservice_properties:\r\n  Id:
+                                sample-vnfd\r\n  vendor: tacker\r\n  version: 1\r\n\r\nvdus:\r\n  vdu1:\r\n
+                                id: vdu1\r\n    vm_image: cirros-0.3.2-x86_64-uec\r\n    instance_type:
+                                m1.tiny\r\n\r\n    network_interfaces:\r\n      management:\r\n        network:
+                                net_mgmt\r\n        management: true\r\n      pkt_in:\r\n        network:
+                                net0\r\n      pkt_out:\r\n        network: net1\r\n\r\n    placement_policy:
+                                \r\n      availability_zone: nova\r\n\r\n    auto-scaling: noop\r\n
+                                monitoring_policy: noop\r\n    failure_policy: noop\r\n\r\n    config:\r\n
+                                param0: key0\r\n      param1: key1"
+                    },
+                    "service_types": [ { "service_type": "vnfd" } ],
+                    "mgmt_driver": "noop",
+                    "infra_driver": "heat"
+                }
             }
-        ],
-        "mgmt_driver": "noop",
-        "infra_driver": "heat"
-    }
-}
-
+            response =  {
+                "vnfd": {
+                    "service_types": [
+                        {
+                            "service_type": "vnfd",
+                            "id": "336fe422-9fba-47c7-87fb-d48475c3e0ce"
+                        }
+                    ],
+                    "description": "OpenWRT router",
+                    "tenant_id": "4dd6c1d7b6c94af980ca886495bcfed0",
+                    "mgmt_driver": "noop",
+                    "infra_driver": "heat",
+                    "attributes": {
+                        "vnfd": "template_name: OpenWRT \r\ndescription:
+                        template_description <sample_vnfd_template>"
+                    },
+                    "id": "ab10a543-22ee-43af-a441-05a9d32a57da",
+                    "name": "OpenWRT"
+                }
+            }
 
     :param client: (HttpClient) Tacker HTTP API client
     :param file: (string) VNFD TOSCA File/Template
     :param name:
-    :return: UUID of installed NFVc if successful
+    :return: UUID of installed NFVd if successful
     """
-    pass
+    auth = {}
+
+    with open(file) as f:
+        tosca = f.read()
+
+    vnfd = {'attributes': {'vnfd': tosca},
+            'service_types': [{'service_type': 'vnfd'}],
+            'mgmt_driver': 'noop',
+            'infra_driver': 'heat'}
+
+    body = {'auth': auth, 'vnfd': vnfd }
+
+    try:
+        response = client.do_request(url='%s/vnfds' % _api_version, method='GET')
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('Client (%s of %s) authentication error: %s' % (client.username,
+                                                                              client.tenant_name,
+                                                                              e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('Client (%s of %s) Connection error: %s' % (client.username,
+                                                                          client.tenant_name,
+                                                                          e.message))
+        raise
+
+    # TODO: error/response code check.  What does it return on 'not found'
+
+    return response.vnfd
 
 def get_nfv_list(client, filter=None):
     """
