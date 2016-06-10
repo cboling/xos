@@ -7,6 +7,8 @@ from xos.logger import observer_logger
 from tackerclient.client import HTTPClient, construct_http_client
 from tackerclient.common.exceptions import Unauthorized, ConnectionFailed
 from tackerclient.common.exceptions import SslCertificateValidationError
+from requests.models import Response
+from requests.exceptions import HTTPError
 
 try:
     step_dir = Config().observer_steps_dir
@@ -29,15 +31,19 @@ except:
 _api_version = '1.0'
 
 
-def get_tacker_client(site, timeout=None):
+def get_tacker_client(site, service_type='nfv-orchestration', timeout=None):
     """
     Get a client connection to Tacker authenticated with our Keystone credentials
-
 
         ie) client = construct_http_client(username='admin', password='devstack', tenant_name='admin',
                                           auth_url='http://192.168.1.121:5000/v2.0')
 
     :param site: (ControllerSite) Site to get client for
+    :param service_type: (string) Service type defined for Tacker service.  For the Liberty
+                                  release, this will may be 'servicevm', for Mitaka+, it will
+                                  most likely be 'nfv-orchestration'.  Run the following command
+                                  on your controller to verify:  'openstack service list' and
+                                  look for the'tacker' entry's 'Type'
     :param timeout: (integer) Connection timeout, see keystoneclient.v2_0.client module
 
     :return: (HttpClient) Tacker HTTP API client
@@ -49,6 +55,7 @@ def get_tacker_client(site, timeout=None):
                                    tenant_name=site.controller.admin_tenant,
                                    password=site.controller.admin_password,
                                    auth_url=site.controller.auth_url,
+                                   service_type=service_type,
                                    timeout=timeout)
     if not client:
         observer_logger.info('TACKER: get client failed')
@@ -58,54 +65,80 @@ def get_tacker_client(site, timeout=None):
         try:
             client.authenticate();
         except Unauthorized as e:
-            observer_logger.error('Client (%s of %s) authentication error: %s' % (site.controller.admin_user,
-                                                                                  site.controller.admin_tenant,
-                                                                                  e.message))
+            observer_logger.error('get_tacker_client: (%s of %s) authentication error: %s' % (site.controller.admin_user,
+                                                                                              site.controller.admin_tenant,
+                                                                                              e.message))
             raise
 
     return client
 
 
-def get_nfvd_list(client, filter=None):
+def get_vnfd_list(client):
     """
-    Get a list of all installed NFV descriptors
+    Get a list of all installed VNF descriptors
 
         ie) client.do_request(url='/v1.0/vnfds', method='GET')
-            (<Response [200]>, u'{"vnfds": []}')
+            (<Response [200]>,
+            u'{"vnfds":
+                [
+                    {
+                        "service_types": [
+                            {
+                                "service_type": "vnfd",
+                                "id": "b3f31224-8f94-4e8f-b08c-0004b77d22b8"
+                            }
+                        ],
+                        "description": "FreeRADIUS Server",
+                        "tenant_id": "092e0614241941568b4c0e6406f7c28f",
+                        "mgmt_driver": "noop",
+                        "infra_driver": "heat",
+                        "attributes": {
+                            "vnfd": "tosca_definitions_version: ... <tosca-file-content> ..."
+                        },
+                        "id": "89b1b3c1-7a88-476b-a13e-9ec49991ab30",
+                        "name": "RADIUS Server"
+                    },
+                    ...
+                ]
+            }')
 
     :param client: (HttpClient) Tacker HTTP API client
-    :param filter: (string) Optional attributes
 
-    :return: (list of dicts) Installed NFV descriptors
+    :return: (list of dicts) Installed VNF descriptors
     """
 
     try:
         response = client.do_request(url='%s/vnfds' % _api_version, method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
-        observer_logger.error('Client (%s of %s) authentication error: %s' % (client.username,
-                                                                              client.tenant_name,
-                                                                              e.message))
+        observer_logger.error('get_vnfd_list: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                             client.tenant_name,
+                                                                                             e.message))
         raise
 
     except ConnectionFailed as e:
-        observer_logger.error('Client (%s of %s) Connection error: %s' % (client.username,
-                                                                          client.tenant_name,
-                                                                          e.message))
+        observer_logger.error('get_vnfd_list: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                         client.tenant_name,
+                                                                                         e.message))
         raise
 
-    # TODO: error/response code check
+    # Response is a tuple with [0] -> class 'requests.models.response'
+    # Check response status
+    try:
+        response[0].raise_for_status()
 
-    if filter:
-        # TODO, apply filters...
-        pass
+    except HTTPError as e:
+        observer_logger.error('get_vnfd_list: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
+        raise
 
-    return response.vnfds
+    return response[0].json()['vnfds']
 
 
-def get_nfvd(client, id):
+def get_nfvd(client, vnfd_id):
     """
-    Get an installed NFV descriptor
+    Get an installed VNF descriptor
 
         ie) client.do_request(url='/v1.0/vnfds/378b774d-89f5-4634-9c65-9c49ed6f00ce', method='GET')
             (<Response [200]>,
@@ -129,39 +162,49 @@ def get_nfvd(client, id):
                 }
             }')
 
-    :param client: (HttpClient) Tacker HTTP API client
-    :param id:     (string) VNF ID (UUID) to retrive
+    :param client:  (HttpClient) Tacker HTTP API client
+    :param nfvd_id: (string) VNF ID (UUID) to retrieve
 
-    :return: (dicts) Installed NFV descriptor or None on failure
+    :return: (dict) Installed VNF descriptor or None on failure
     """
 
     try:
-        response = client.do_request(url='%s/vnfds' % _api_version, method='GET')
+        response = client.do_request(url='%s/vnfds/%s' % (_api_version, nfvd_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
-        observer_logger.error('Client (%s of %s) authentication error: %s' % (client.username,
-                                                                              client.tenant_name,
-                                                                              e.message))
+        observer_logger.error('get_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
         raise
 
     except ConnectionFailed as e:
-        observer_logger.error('Client (%s of %s) Connection error: %s' % (client.username,
-                                                                          client.tenant_name,
-                                                                          e.message))
+        observer_logger.error('get_vnfd: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                    client.tenant_name,
+                                                                                    e.message))
         raise
 
-    # TODO: error/response code check.  What does it return on 'not found'
+    # Check response status
+    try:
+        response.raise_for_status()
 
-    return response.vnfd
+    except HTTPError as e:
+        observer_logger.error('get_vnfd: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                   client.tenant_name,
+                                                                                   e.message))
+        raise
+
+    json_data = response[0].json()['vnfd']
+
+    return json_data if len(json_data) > 0 else None
 
 
-def onboard_nfvd(client, file, name):
+def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None, tenant_name=None):
     """
-    Install NFVD
+    Install VNFD
 
     ie)     client.do_request(url='/v1.0/vnfd', method='POST')
             request args = {
-                "auth": { "tenantName": "admin", "passwordCredentials": { "username": "admin", "password": "devstack" } },
+                "auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "devstack"}},
                 "vnfd": {
                     "attributes": {
                         "vnfd": "template_name:
@@ -202,13 +245,31 @@ def onboard_nfvd(client, file, name):
             }
 
     :param client: (HttpClient) Tacker HTTP API client
-    :param file: (string) VNFD TOSCA File/Template
-    :param name:
-    :return: UUID of installed NFVd if successful
-    """
-    auth = {}
+    :param filename: (string) VNFD TOSCA File/Template
+    :param vnfd_name: (string) Name to give newly created VNFD
+    :param username: (string) Authentication username to use
+    :param password: (string) Authentication password
+    :param tenant_name: (string) Default tenant name (or UUID) to launch VNFs in     TODO: Verify this param
 
-    with open(file) as f:
+    :return: (tuple) (name, UUID of installed VNFD) if successful
+    """
+    if tenant_name is None:
+        tenant_name = client.get_auth_info()['auth_tenant_id']
+
+    auth = {
+        "tenantName": tenant_name,
+        "passwordCredentials":
+            {
+                "username": username if username is not None else client.username,
+                "password": password if password is not None else client.password
+            }
+    }
+    # TODO: How do we give it a specific VNFD name ????
+    # TODO: Need a lot of testing on this function.  Look into error returns if parsing fails
+    # TODO: Look into TOSCA parser file differences between Libery & Mitaka.  Make Mitaka work first !
+    # VNFD portion
+
+    with open(filename) as f:
         tosca = f.read()
 
     vnfd = {'attributes': {'vnfd': tosca},
@@ -216,56 +277,213 @@ def onboard_nfvd(client, file, name):
             'mgmt_driver': 'noop',
             'infra_driver': 'heat'}
 
-    body = {'auth': auth, 'vnfd': vnfd }
+    body = {'auth': auth, 'vnfd': vnfd}
 
     try:
-        response = client.do_request(url='%s/vnfds' % _api_version, method='GET')
+        response = client.request(url='%s/vnfds' % _api_version, method='POST',
+                                  body=body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
-        observer_logger.error('Client (%s of %s) authentication error: %s' % (client.username,
-                                                                              client.tenant_name,
-                                                                              e.message))
+        observer_logger.error('onboard_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                            client.tenant_name,
+                                                                                            e.message))
         raise
 
     except ConnectionFailed as e:
-        observer_logger.error('Client (%s of %s) Connection error: %s' % (client.username,
-                                                                          client.tenant_name,
-                                                                          e.message))
+        observer_logger.error('onboard_vnfd: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
         raise
 
-    # TODO: error/response code check.  What does it return on 'not found'
+    # Check response status
+    try:
+        response.raise_for_status()
 
-    return response.vnfd
+    except HTTPError as e:
+        observer_logger.error('onboard_vnfd: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                       client.tenant_name,
+                                                                                       e.message))
+        raise
 
-def get_nfv_list(client, filter=None):
+    return response[0].json()['name'], response[0].json()['id']
+
+
+def destroy_nfvd(client, vnfd_id):
     """
-    Get a list of all running NFVs
+    Delete a given VNFD from the catalog
+    :param client: (HttpClient) Tacker HTTP API client
+    :param vnfd_id: (string) VNFD UUID
+    :return: True if successful
+    """
+    try:
+        response = client.do_request(url='%s/vnfd/%s' % (_api_version, vnfd_id), method='DELETE')
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('destroy_nfvd: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                            client.tenant_name,
+                                                                                            e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('destroy_nfvd: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
+        raise
+
+    # TODO: Debug this.
+    # Check response status
+    try:
+        response[0].raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('destroy_nfvd: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                       client.tenant_name,
+                                                                                       e.message))
+        raise
+
+    return True
+
+
+def get_vnf_list(client):
+    """
+    Get a list of all running VNFs
 
         ie) client.do_request(url='/v1.0/vnfs', method='GET')
             (<Response [200]>, u'{"vnfs": []}')
 
     :param client: (HttpClient) Tacker HTTP API client
-    :param filter: (string) Optional NFVD name to filter on
 
     :return: (list of dicts) Current list of NFVs
     """
-    pass
 
-def launch_nfv(client, nfvd, params):
+    try:
+        response = client.do_request(url='%s/vnfs' % _api_version, method='GET')
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('get_vnf_list: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                            client.tenant_name,
+                                                                                            e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('get_vnf_list: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
+        raise
+
+    # Response is a tuple with [0] -> class 'requests.models.response'
+    # Check response status
+    try:
+        response[0].raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('get_vnf_list: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                       client.tenant_name,
+                                                                                       e.message))
+        raise
+
+    return response[0].json()['vnfs']
+
+
+def get_vnf(client, vnf_id):
     """
-    Launch an NFV
+    Get a list of all running NFVs
+
+        ie) client.do_request(url='/v1.0/vnfs/{id}', method='GET')
+            (<Response [200]>, u'{"vnfs": []}')
+
     :param client: (HttpClient) Tacker HTTP API client
-    :param nfvd:
-    :param params:
+    :param vnf_id: (string) UUID of VNF to retrieve
+
+    :return: (list of dicts) Current list of NFVs
+    """
+
+    try:
+        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='GET')
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('get_nfv_list: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                            client.tenant_name,
+                                                                                            e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('get_nfv_list: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                        client.tenant_name,
+                                                                                        e.message))
+        raise
+
+    # Response is a tuple with [0] -> class 'requests.models.response'
+    # Check response status
+    try:
+        response[0].raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('get_nfv_list: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                       client.tenant_name,
+                                                                                       e.message))
+        raise
+
+    # TODO: Debug this. Document says this is a list of dict (with 1 item) but that does not make sense
+    json_data = response[0].json()['vnf']
+
+    return json_data if len(json_data) > 0 else None
+
+
+def launch_nfv(client, vnfd_id, params, vnfd_name=None, username=None, password=None, tenant_name=None):
+    """
+    Launch an VNF
+    :param client: (HttpClient) Tacker HTTP API client
+    :param vnfd_id: (string) VNF UUID
+    :param params: TODO ???
     :return: UUID of installed NFV if successful
     """
     pass
 
-def destroy_nfv(client, nfv):
+
+def update_nfv(client, vnfd, params):
     """
-    Stop NFV
+     Update a vnf based on user config file or data.
     :param client: (HttpClient) Tacker HTTP API client
-    :param nfv: (string) name
-    :return: True if successful
+    :param vnfd: (string) VNF UUID
+    :param params: TODO ???
+    :return: UUID of installed NFV if successful
     """
     pass
+
+
+def destroy_nfv(client, vnf_id):
+    """
+    Stop and delete a given VNF
+    :param client: (HttpClient) Tacker HTTP API client
+    :param vnf_id: (string) VNF UUID
+    :return: True if successful
+    """
+    try:
+        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='DELETE')
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('destroy_nfv: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                           client.tenant_name,
+                                                                                           e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('destroy_nfv: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                       client.tenant_name,
+                                                                                       e.message))
+        raise
+
+    # Response is a tuple with [0] -> class 'requests.models.response'
+    # Check response status
+    try:
+        response[0].raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('destroy_nfv: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                      client.tenant_name,
+                                                                                      e.message))
+        raise
+
+    # TODO: Debug this.
+    return True
