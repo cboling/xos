@@ -433,6 +433,34 @@ def get_vnf(client, vnf_id):
 def launch_nfv(client, vnfd_id, params, vnfd_name=None, username=None, password=None, tenant_name=None):
     """
     Launch an VNF
+
+    Request:
+      {
+        "auth": {"tenantName": "admin",
+                 "passwordCredentials": {"username": "admin", "password": "devstack"}},
+        "vnf": {"vnfd_id": "d770ddd7-6014-4191-92d8-a2cd7a6cecd8"}}
+
+    Response:
+        {
+            "vnf": {
+                "status": "PENDING_CREATE",
+                "name": "",
+                "tenant_id": "4dd6c1d7b6c94af980ca886495bcfed0",
+                "description": "OpenWRT with services",
+                "instance_id": "4f0d6222-afa0-4f02-8e19-69e7e4fd7edc",
+                "mgmt_url": null,
+                "attributes": {
+                    "service_type": "firewall",
+                    "heat_template": "description: OpenWRT with services\n
+                    <sample_heat_template> type: OS::Nova::Server\n",
+                    "monitoring_policy": "noop",
+                    "failure_policy": "noop"
+                },
+                "id": "e3158513-92f4-4587-b949-70ad0bcbb2dd",
+                "vnfd_id": "247b045e-d64f-4ae0-a3b4-8441b9e5892c"
+            }
+        }
+
     :param client: (HttpClient) Tacker HTTP API client
     :param vnfd_id: (string) VNF UUID
     :param params: TODO ???
