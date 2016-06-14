@@ -1,13 +1,8 @@
-import jinja2
-import tempfile
-import os
-import string
 from xos.config import Config, XOS_DIR
 from xos.logger import observer_logger
 from tackerclient.client import HTTPClient, construct_http_client
 from tackerclient.common.exceptions import Unauthorized, ConnectionFailed
 from tackerclient.common.exceptions import SslCertificateValidationError
-from requests.models import Response
 from requests.exceptions import HTTPError
 
 try:
@@ -169,7 +164,7 @@ def get_nfvd(client, vnfd_id):
     """
 
     try:
-        response = client.do_request(url='%s/vnfds/%s' % (_api_version, nfvd_id), method='GET')
+        response = client.do_request(url='%s/vnfds/%s' % (_api_version, vnfd_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -204,7 +199,8 @@ def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None,
 
     ie)     client.do_request(url='/v1.0/vnfd', method='POST')
             request args = {
-                "auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "devstack"}},
+                "auth": {"tenantName": "admin",
+                         "passwordCredentials": {"username": "admin", "password": "devstack"}},
                 "vnfd": {
                     "attributes": {
                         "vnfd": "template_name:
@@ -389,6 +385,8 @@ def get_vnf(client, vnf_id):
     """
     Get a list of all running NFVs
 
+    GET /v1.0/vnfs
+
         ie) client.do_request(url='/v1.0/vnfs/{id}', method='GET')
             (<Response [200]>, u'{"vnfs": []}')
 
@@ -430,9 +428,11 @@ def get_vnf(client, vnf_id):
     return json_data if len(json_data) > 0 else None
 
 
-def launch_nfv(client, vnfd_id, params, vnfd_name=None, username=None, password=None, tenant_name=None):
+def launch_nfv(client, vnfd_id, param_filename, username=None, password=None, tenant_name=None):
     """
     Launch an VNF
+
+    PUT /v1.0/vnfs/{vnf_id}
 
     Request:
       {
@@ -463,21 +463,159 @@ def launch_nfv(client, vnfd_id, params, vnfd_name=None, username=None, password=
 
     :param client: (HttpClient) Tacker HTTP API client
     :param vnfd_id: (string) VNF UUID
-    :param params: TODO ???
-    :return: UUID of installed NFV if successful
+    :param param_filename: Filename of VNFD template parameters, if any
+    :param username: (string) Authentication username to use
+    :param password: (string) Authentication password
+    :param tenant_name: (string) Default tenant name (or UUID) to launch VNFs in     TODO: Verify this param
+
+    :return: (dict) VNF launch results (see 'vnf' dict contents above for example)
     """
-    pass
+    if tenant_name is None:
+        tenant_name = client.get_auth_info()['auth_tenant_id']
+
+    auth = {
+        "tenantName": tenant_name,
+        "passwordCredentials":
+            {
+                "username": username if username is not None else client.username,
+                "password": password if password is not None else client.password
+            }
+    }
+    # TODO: How do we give it a specific VNF name ????
+    # TODO: What about multi-VIM support in Mitaka+
+
+    # VNF portion
+
+    vnf = {'vnfd_id': vnfd_id}
+
+    # TODO: How is a parameter file passed in.  May be this way
+    # TODO: Also support a config file,  see .../python-tackerclinet/tackerclient/tacker/v1_0/vm/vnf.py
+
+    if param_filename is not None:
+        with open(param_filename) as f:
+            vnv['attributes']['param_values'] = f.read()
+
+    # Create body for request
+
+    body = {'auth': auth, 'vnf': vnf}
+
+    try:
+        response = client.request(url='%s/vnfs' % _api_version, method='POST',
+                                  body=body)
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('launch_nfv: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                          client.tenant_name,
+                                                                                          e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('launch_nfv: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                      client.tenant_name,
+                                                                                      e.message))
+        raise
+
+    # Check response status
+    try:
+        response.raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('launch_nfv: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                     client.tenant_name,
+                                                                                     e.message))
+        raise
+
+    return response[0].json()['vnf']
 
 
-def update_nfv(client, vnfd, params):
+def update_nfv(client, vnf_id, config_filename, username=None, password=None, tenant_name=None):
     """
-     Update a vnf based on user config file or data.
+    Update a vnf based on user config file or data.
+
+    PUT /v1.0/vnfs/{vnf_id}
+
+    Request:
+        {"auth": {"tenantName": "admin",
+                  "passwordCredentials": {"username": "admin", "password": "devstack"}},
+        "vnf": {"attributes": {"config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"}}}
+
+    Response:
+        {
+            "vnf": {
+                "status": "PENDING_UPDATE",
+                "name": "",
+                "tenant_id": "4dd6c1d7b6c94af980ca886495bcfed0",
+                "instance_id": "4f0d6222-afa0-4f02-8e19-69e7e4fd7edc",
+                "mgmt_url": "{\"vdu1\": \"192.168.120.4\"}",
+                "attributes": {
+                    "service_type": "firewall",
+                    "monitoring_policy": "noop",
+                    "config": "vdus:\n  vdu1:\n    config: {<sample_vdu_config>
+                     type: OS::Nova::Server\n",
+                    "failure_policy": "noop"
+                },
+                "id": "e3158513-92f4-4587-b949-70ad0bcbb2dd",
+                "description": "OpenWRT with services"
+            }
+        }
+
+
     :param client: (HttpClient) Tacker HTTP API client
-    :param vnfd: (string) VNF UUID
-    :param params: TODO ???
-    :return: UUID of installed NFV if successful
+    :param vnf_id: (string) VNF UUID
+    :param config_filename: Configuration filename
+    :param username: (string) Authentication username to use
+    :param password: (string) Authentication password
+    :param tenant_name: (string) Default tenant name (or UUID) to launch VNFs in     TODO: Verify this param
+
+
+    :return: (dict) VNF launch results (see 'vnf' dict contents above for example)
     """
-    pass
+    if tenant_name is None:
+        tenant_name = client.get_auth_info()['auth_tenant_id']
+
+    auth = {
+        "tenantName": tenant_name,
+        "passwordCredentials":
+            {
+                "username": username if username is not None else client.username,
+                "password": password if password is not None else client.password
+            }
+    }
+    config = {}
+    with open(config_filename) as f:
+        config['attributes']['config'] = f.read()
+
+    # Create body for request
+
+    body = {'auth': auth, 'vnf': config}
+
+    try:
+        response = client.request(url='%s/vnfs' % _api_version, method='POST',
+                                  body=body)
+
+    except (Unauthorized, SslCertificateValidationError) as e:
+        observer_logger.error('update_nfv: Client (%s of %s) authentication error: %s' % (client.username,
+                                                                                          client.tenant_name,
+                                                                                          e.message))
+        raise
+
+    except ConnectionFailed as e:
+        observer_logger.error('update_nfv: Client (%s of %s) Connection error: %s' % (client.username,
+                                                                                      client.tenant_name,
+                                                                                      e.message))
+        raise
+
+    # Check response status
+    try:
+        response.raise_for_status()
+
+    except HTTPError as e:
+        observer_logger.error('update_nfv: Client (%s of %s) Response Failed: %s' % (client.username,
+                                                                                     client.tenant_name,
+                                                                                     e.message))
+        raise
+
+    return response[0].json()['vnf']
 
 
 def destroy_nfv(client, vnf_id):
