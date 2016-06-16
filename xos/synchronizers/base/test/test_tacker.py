@@ -1,27 +1,10 @@
 #!/usr/bin/python
 
+from defaults import *
+from test_classes import ControllerTest, SiteTest
+
 from xos.synchronizers.base import tacker as tackerV10
 import argparse
-
-_TACKER_VNFD_YAML = 'files/cirros-mitaka.yaml'               # No parameters
-_TACKER_VNFD_TEMPLATE = 'files/radius-mitaka-template.yaml'  # Takes parameters
-_TACKER_VNF_PARAMETERS = 'files/radius-param.yaml'           # VNF template
-_TACKER_VNF_CONFIG = 'files/radius-config.yaml'              # Config for VNF launch
-_TACKER_VNF_UPDATE = 'files/radius-update.yaml'              # VNF configuration update
-
-
-class ControllerTest:
-    def __init__(self, user, password, tenant, auth_url):
-        self.admin_user = user
-        self.admin_password = password
-        self.admin_tenant = tenant
-        self.auth_url = auth_url
-
-
-class SiteTest:
-    def __init__(self, user, password, tenant, auth_url):
-        self.controller = ControllerTest(user, password, tenant, auth_url)
-
 
 ###########################################################################
 # Parse the command line
@@ -30,15 +13,15 @@ parser = argparse.ArgumentParser(description='Mock RESTCONF Device')
 
 parser.add_argument('--verbose', '-v', action='store_true', default=False,
                     help='Output verbose information')
-parser.add_argument('--username', '-u', action='store', default='admin',
+parser.add_argument('--username', '-u', action='store', default=OPENSTACK_USER,
                     help='Administrative User Name')
-parser.add_argument('--password', '-p', action='store', default='devstack',
+parser.add_argument('--password', '-p', action='store', default=OPENSTACK_PASSWORD,
                     help='Administrative Password')
-parser.add_argument('--tenant', '-t', action='store', default='admin',
+parser.add_argument('--tenant', '-t', action='store', default=OPENSTACK_TENANT_NAME,
                     help='Administrative Tenant Name')
-parser.add_argument('--auth_url', '-a', action='store', default='http://localhost:35357/v2.0',
+parser.add_argument('--auth_url', '-a', action='store', default=OPENSTACK_AUTH_URL,
                     help='Keystone Authorization URL')
-parser.add_argument('--service_type', '-s', action='store', default='nfv-orchestration',
+parser.add_argument('--service_type', '-s', action='store', default=OPENSTACK_SERVICE_TYPE,
                     help='Service Type for Tacker')
 
 args = parser.parse_args()
@@ -81,3 +64,14 @@ if __name__ == "__main__":
     except Exception as e:
         print 'Unexpected exception during test run: %s' % e
         raise
+
+import unittest
+
+
+class SimplisticTest(unittest.TestCase):
+    def test(self):
+        self.assertTrue(True)
+
+
+if __name__ == '__main__':
+    unittest.main()
