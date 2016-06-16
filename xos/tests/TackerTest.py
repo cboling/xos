@@ -1,7 +1,14 @@
 #!/usr/bin/python
 
-from tacker import *
+from xos.synchronizers.base import tacker as tackerV10
 import argparse
+
+_TACKER_VNFD_YAML = 'files/cirros-mitaka.yaml'               # No parameters
+_TACKER_VNFD_TEMPLATE = 'files/radius-mitaka-template.yaml'  # Takes parameters
+_TACKER_VNF_PARAMETERS = 'files/radius-param.yaml'           # VNF template
+_TACKER_VNF_CONFIG = 'files/radius-config.yaml'              # Config for VNF launch
+_TACKER_VNF_UPDATE = 'files/radius-update.yaml'              # VNF configuration update
+
 
 class ControllerTest:
     def __init__(self, user, password, tenant, auth_url):
@@ -9,6 +16,7 @@ class ControllerTest:
         self.admin_password = password
         self.admin_tenant = tenant
         self.auth_url = auth_url
+
 
 class SiteTest:
     def __init__(self, user, password, tenant, auth_url):
@@ -34,6 +42,16 @@ parser.add_argument('--service_type', '-s', action='store', default='nfv-orchest
                     help='Service Type for Tacker')
 
 args = parser.parse_args()
+
+
+def _vnfd_tests(client):
+    pass
+
+
+def _vnf_tests(client):
+    pass
+
+
 #
 # Start the tests
 #
@@ -45,6 +63,21 @@ if __name__ == "__main__":
     if args.verbose:
         print('Creating Tacker HTTP Client')
 
-    client = tacker.construct_http_client(mySite, service_type=args.service_type)
+    try:
+        client = tackerV10.construct_http_client(mySite, service_type=args.service_type)
 
+        # First tests VNFD interfaces
 
+        _vnf_tests(client)
+
+        # VNF tests last
+
+        _vnf_tests(client)
+
+        # If here, all tests pass
+
+        print 'Completed all tests as expected'
+
+    except Exception as e:
+        print 'Unexpected exception during test run: %s' % e
+        raise

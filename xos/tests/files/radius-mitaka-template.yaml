@@ -1,0 +1,93 @@
+tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
+
+description: freeRADIUS VNFD
+
+metadata:
+  template_name: freeradius-vnfd
+  ID:            freeradius-vnfd
+  vendor:        ADTRAN, Inc.
+  version:       1.0.0
+
+topology_template:
+
+  inputs:
+    vm_image:
+      type: string
+      default: RADIUS-Server
+      description: The Glance Image for the VNF
+
+    zone:
+      type: string
+      default: nova
+      description: Nova availability zone
+
+    num_cpus:
+      type: integer
+      description: Number of CPUs for the RADIUS server.
+      constraints:
+        - valid_values: [ 1, 2, 4, 8 ]
+
+    disk_size:
+      type: scalar-unit.size
+      default: 1 GB
+      description: Size of the storage to be created.
+
+    mem_size:
+      type: scalar-unit.size
+      default: 1 GB
+      description: Size of the memory to allocate
+
+    data_network:
+      type: string
+      description: The main network connection for RADIUS packets
+
+    data_ip_address:
+      type: string
+      description: IP Address for the data network
+
+    data_is_management:
+      type: boolean
+      default: false
+      description: Flag indicating if data network can be used for VNF monitoring/management
+
+  node_templates:
+    VDU1:
+      type: tosca.nodes.nfv.VDU.Tacker
+      properties:
+        image:             { get_input: vm_image }
+        #user_data:         { get_input: user_data }
+        #user_data_format:  { get_input: user_data_format }
+        availability_zone: { get_input: zone }
+        mgmt_driver: noop
+        #monitoring_policy: noop
+        config: |
+          param0: key1
+          param1: key2
+
+      capabilities:
+        nfv_compute:
+          properties:
+            num_cpus:  { get_input: num_cpus }
+            mem_size:  { get_input: mem_size }
+            disk_size: { get_input: disk_size }
+
+    DataCP:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        management: { get_input: data_is_management }
+        anti_spoofing_protection: false
+
+      attributes:
+        address: { get_input: data_ip_address }
+
+      requirements:
+        - virtualLink:
+            node: DataVL
+        - virtualBinding:
+            node: VDU1
+
+    DataVL:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: { get_input: data_network }
+        vendor: Tacker

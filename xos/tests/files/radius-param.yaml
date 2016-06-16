@@ -1,0 +1,40 @@
+#
+# Example parameters for RADIUS service
+vdus:
+  vdu1:
+    param:
+      vm_image: RADIUS-Server
+      flavor: m1.small
+      num_cpus: 1
+      mem_size: 512 MB
+      disk_size: 6 GB
+      management: False
+      #mgmt_network: CTRL_604
+      data_network: test-net
+      data_ip_address:
+        - 10.17.173.11
+      zone: nova
+      user_data_format: RAW
+
+      # For the user data, create both the initial users and clients.conf flies
+
+      user_data: |
+        #!/bin/bash
+        cat <<'EOF' > /etc/freeradius/clients.conf
+        #  Define RADIUS clients (usually a NAS, Access Point, etc.).
+        #
+        # Use same shared secret for all CORD clients
+        client 192.168.1.0/24 {
+           secret = ONOSecret
+           shortname = volt-network
+        }
+        EOF
+        cat <<'EOF' > /etc/freeradius/users
+        # Use same shared secret for all CORD clients
+        #
+        cpeLoginName Cleartext-Password := "CPESecret"
+        #
+        # On no match, the user is denied access.
+        EOF
+
+
