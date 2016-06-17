@@ -14,4 +14,4 @@ def create_test_suite():
     suites = [unittest.defaultTestLoader.loadTestsFromName(name)
               for name in module_strings]
 
-return unittest.TestSuite(suites) if len(suites) > 0 else None
+    return unittest.TestSuite(suites) if len(suites) > 0 else None

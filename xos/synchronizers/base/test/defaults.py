@@ -20,9 +20,6 @@ class SiteTest:
     def __init__(self, user, password, tenant, auth_url):
         self.controller = ControllerTest(user, password, tenant, auth_url)
 
-
-
-
 # Files (Templates/parameters/...)
 
 TACKER_VNFD_YAML = 'files/cirros-mitaka.yaml'               # No parameters
