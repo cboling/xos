@@ -58,12 +58,15 @@ def get_tacker_client(site, service_type='nfv-orchestration', timeout=None):
         observer_logger.info('TACKER: get client results: %s' % client)
 
         try:
-            client.authenticate();
+            client.authenticate()
         except Unauthorized as e:
             observer_logger.error('get_tacker_client: (%s of %s) authentication error: %s' % (site.controller.admin_user,
                                                                                               site.controller.admin_tenant,
                                                                                               e.message))
             raise
+
+        except ConnectionFailed:
+            r.status_code = "Connection refused"
 
     return client
 
