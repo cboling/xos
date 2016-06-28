@@ -1,19 +1,36 @@
 #!/usr/bin/python
 
 import unittest
+import os
 from defaults import *
 from TackerTestClasses import SiteTest
 from synchronizers.base import tacker
 from tackerclient.client import HTTPClient, construct_http_client
 from tackerclient.common.exceptions import Unauthorized, ConnectionFailed
+from exceptions import IOError, TypeError
 from keystoneclient.exceptions import EndpointNotFound
 from tackerclient.common.exceptions import SslCertificateValidationError
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, MissingSchema
 
 import sys
 import pdb
 import functools
 import traceback
+
+
+# These credentials from 'defaults.py' can be assigned on the command line via argparse
+_test_credentials = {
+    'user': OPENSTACK_USER,
+    'password': OPENSTACK_PASSWORD,
+    'tenant': OPENSTACK_TENANT_NAME,
+    'service_type': OPENSTACK_SERVICE_TYPE,
+    'auth_url': 'http://172.22.8.227:35357/v2.0',      # Some various configs for testing,
+    # 'auth_url': OPENSTACK_AUTH_URL,
+}
+# TODO: Currently, only the new TOSCA parser (Mitaka, Newton) is supported
+# Set the next to 'True' if testing Kilo or Liberty Tacker APIs
+
+_use_old_parser = False
 
 
 def debug_on(*exceptions):
@@ -31,16 +48,6 @@ def debug_on(*exceptions):
                 pdb.post_mortem(info[2])
         return wrapper
     return decorator
-
-# These credentials from 'defaults.py' can be assigned on the command line via argparse
-_test_credentials = {
-    'user': OPENSTACK_USER,
-    'password': OPENSTACK_PASSWORD,
-    'tenant': OPENSTACK_TENANT_NAME,
-    'service_type': OPENSTACK_SERVICE_TYPE,
-    'auth_url': 'http://172.22.8.227:35357/v2.0',      # Some various configs for testing,
-    # 'auth_url': OPENSTACK_AUTH_URL,
-}
 
 
 def _create_site(user=_test_credentials['user'],
@@ -91,14 +98,25 @@ def _create_client(user=_test_credentials['user'],
                                     **kwargs)
 
 
-def _onboard_vnfd(client, vnfd_file):
+def _template_path(filename, old_parser=_use_old_parser):
+    return os.path.join('tosca', filename) if not _use_old_parser else os.path.join('tosca', 'legacy', filename)
+
+
+def _onboard_vnfd(client, filepath, vnfd_name=None, tenant_name=_test_credentials['tenant']):
     """
     Onboard a known good VNFD
-    :param client:
-    :param vnfd_file:
-    :return:
+
+    :param client: (HttpClient) Tacker HTTP API client
+    :param filepath: (string) VNFD TOSCA File/Template
+    :param vnfd_name: (string) Name to give newly created VNFD
+    :return: (tuple) (name, UUID of installed VNFD) if successful
     """
-    pass
+    return tacker.onboard_vnfd(client, filename=filepath, vnfd_name=vnfd_name,
+                               tenant_name=tenant_name)
+
+
+def _vnfd_cleanup(client, vnfd_id):
+    return tacker.destroy_nfvd(client, vnfd_id)
 
 
 class CredentialsTest(unittest.TestCase):
@@ -187,38 +205,57 @@ class CredentialsTest(unittest.TestCase):
                           service_type=_test_credentials['service_type'] + 'x')
 
 
-# class VNFDSimpleTest(unittest.TestCase):
-#     """
-#     Test that a good onboard & destroy works as expected (simple) sinc
-#     these VNFDs will be used in other VNFD and VNF tests
-#     """
-#     def setUp(self):
-#         self.client = _create_client()
-#         self.assertTrue(self.client is not None)
-#
-#     def tearDown(self):
-#         self.client = None
-#
-#     @debug_on()
-#     def testSomething(self):
-#         """Verify something"""
-#         self.fail('TODO: Implement some tests')
-#
-#
-# class VNFDOnboardTest(unittest.TestCase):
-#     def setUp(self):
-#         self.client = _create_client()
-#         self.assertTrue(self.client is not None)
-#
-#     def tearDown(self):
-#         self.client = None
-#
-#     @debug_on()
-#     def testSomething(self):
-#         """Verify something"""
-#         self.fail('TODO: Implement some tests')
-#
-#
+class VNFDOnboardTest(unittest.TestCase):
+    """
+    Test that a good onboard & destroy works as expected (simple) since
+    these VNFDs will be used in other VNFD and VNF tests
+    """
+    def setUp(self):
+        self.client = _create_client()
+        self.template = _template_path('cirros.yaml')
+        self.name = 'TackerUnitTest-Cirros'
+        self.vnfd_id = None
+        self.assertTrue(self.client is not None)
+
+    def tearDown(self):
+        # if self.vnfd_id is not None:
+        #    _vnfd_cleanup(self.client, self.vnfd_id)
+        self.client = None
+
+    @debug_on()
+    def testOnboardCirros(self):
+        """Verify simple VNFD onboard and destroy works as expected"""
+        _, self.vnfd_id = _onboard_vnfd(self.client, self.template, self.name)
+        self.assertIsNotNone(self.vnfd_id)
+
+        # clean = _vnfd_cleanup(self.client, self.vnfd_id)
+        # self.assertTrue(clean)
+        #
+        # if clean:
+        #     self.vnfd_id = None
+
+    @debug_on()
+    def testBadTemplateFile(self):
+        """Bad template name raises appropriate exception"""
+
+        self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename=self.template + 'xxxxxx')
+        self.assertRaises(TypeError, tacker.onboard_vnfd, self.client, filename=None)
+        self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename='')
+
+    # @debug_on()
+    # def testBadCredentials(self):
+    #     """Bad username, password, or tenant raises appropriate exception"""
+    #
+    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+    #                       username=_test_credentials['user'] + 'xxxxxx')
+    #
+    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+    #                       password=_test_credentials['password'] + 'xxxxxx')
+    #
+    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+    #                       tenant_name=_test_credentials['tenant'] + 'xxxxxx')
+
+
 # class VNFDDestroyTest(unittest.TestCase):
 #     def setUp(self):
 #         self.client = _create_client()
@@ -263,6 +300,23 @@ class CredentialsTest(unittest.TestCase):
 # class SimpleVNFTest(unittest.TestCase):
 #     """
 #     Test that running a known good VNF works.  Used in setup for further VNF tests
+#     """
+#     def setUp(self):
+#         self.client = _create_client()
+#         self.assertTrue(self.client is not None)
+#
+#     def tearDown(self):
+#         self.client = None
+#
+#     @debug_on()
+#     def testSomething(self):
+#         """Verify something"""
+#         self.fail('TODO: Implement some tests')
+#
+#
+#  class SimpleVNFTestWithParameters(unittest.TestCase):
+#     """
+#     Test that running a known good VNF works with a parameters files works
 #     """
 #     def setUp(self):
 #         self.client = _create_client()
