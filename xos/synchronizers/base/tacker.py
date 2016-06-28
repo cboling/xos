@@ -26,7 +26,7 @@ except:
 _api_version = '1.0'
 
 
-def get_tacker_client(site, service_type='nfv-orchestration', timeout=None):
+def get_tacker_client(site, service_type='nfv-orchestration', timeout=None, **kwargs):
     """
     Get a client connection to Tacker authenticated with our Keystone credentials
 
@@ -51,7 +51,7 @@ def get_tacker_client(site, service_type='nfv-orchestration', timeout=None):
                                    password=site.controller.admin_password,
                                    auth_url=site.controller.auth_url,
                                    service_type=service_type,
-                                   timeout=timeout)
+                                   timeout=timeout, **kwargs)
     if not client:
         observer_logger.info('TACKER: get client failed')
     else:
@@ -66,7 +66,8 @@ def get_tacker_client(site, service_type='nfv-orchestration', timeout=None):
             raise
 
         except ConnectionFailed:
-            r.status_code = "Connection refused"
+            # This can happen during unittest if you retry too often
+            raise
 
     return client
 
