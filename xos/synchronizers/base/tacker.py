@@ -25,7 +25,7 @@ except:
 #
 #         See: http://tacker-docs.readthedocs.io/en/latest/devref/mano_api.html
 #
-_api_version = '1.0'
+_api_version = 'v1.0'
 
 
 def get_tacker_client(site, service_type='nfv-orchestration', timeout=None, **kwargs):
@@ -170,7 +170,7 @@ def get_nfvd(client, vnfd_id):
     """
 
     try:
-        response = client.do_request(url='/%s/vnfds/%s' % (_api_version, vnfd_id), method='GET')
+        response = client.do_request(url='%s/vnfds/%s' % (_api_version, vnfd_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -199,7 +199,7 @@ def get_nfvd(client, vnfd_id):
     return json_data if len(json_data) > 0 else None
 
 
-def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None, tenant_name=None):
+def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, username=None, password=None, tenant_name=None):
     """
     Install VNFD
 
@@ -249,6 +249,7 @@ def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None,
     :param client: (HttpClient) Tacker HTTP API client
     :param filename: (string) VNFD TOSCA File/Template
     :param vnfd_name: (string) Name to give newly created VNFD
+    :param vnfd_description: (string) VNFD Description text
     :param username: (string) Authentication username to use
     :param password: (string) Authentication password
     :param tenant_name: (string) Default tenant name (or UUID) to launch VNFs in     TODO: Verify this param
@@ -281,6 +282,12 @@ def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None,
             'mgmt_driver': 'noop',
             'infra_driver': 'heat'}
 
+    if vnfd_name is not None:
+        vnfd['name'] = vnfd_name
+
+    if vnfd_description is not None:
+        vnfd['description'] = vnfd_description
+
     body = {'auth': auth, 'vnfd': vnfd}
 
     # TODO: May want to add parameter  'ensure_ascii=False' to json.dumps below
@@ -305,6 +312,9 @@ def onboard_vnfd(client, filename, vnfd_name=None, username=None, password=None,
 
     # Check response status
     try:
+        # print 'Response type is %s' % type(response)        # Tuple
+        # print 'Response[0] type is %s' % type(response[0])  # requests.modes.Response
+        pprint.PrettyPrinter(indent=4).pprint(response)
         response.raise_for_status()
 
     except HTTPError as e:
@@ -324,7 +334,7 @@ def destroy_nfvd(client, vnfd_id):
     :return: True if successful
     """
     try:
-        response = client.do_request(url='/%s/vnfd/%s' % (_api_version, vnfd_id), method='DELETE')
+        response = client.do_request(url='%s/vnfd/%s' % (_api_version, vnfd_id), method='DELETE')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('destroy_nfvd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -365,7 +375,7 @@ def get_vnf_list(client):
     """
 
     try:
-        response = client.do_request(url='/%s/vnfs' % _api_version, method='GET')
+        response = client.do_request(url='%s/vnfs' % _api_version, method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnf_list: Client (%s of %s) authentication error: %s' % (client.username,
@@ -409,7 +419,7 @@ def get_vnf(client, vnf_id):
     """
 
     try:
-        response = client.do_request(url='/%s/vnfs/%s' % (_api_version, vnf_id), method='GET')
+        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_nfv_list: Client (%s of %s) authentication error: %s' % (client.username,
@@ -515,7 +525,7 @@ def launch_nfv(client, vnfd_id, param_filename, username=None, password=None, te
     json_body = json.dumps(body)
 
     try:
-        response = client.do_request(url='/%s/vnfs' % _api_version, method='POST',
+        response = client.do_request(url='%s/vnfs' % _api_version, method='POST',
                                      body=json_body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
@@ -608,7 +618,7 @@ def update_nfv(client, vnf_id, config_filename, username=None, password=None, te
     json_body = json.dumps(body)
 
     try:
-        response = client.do_request(url='/%s/vnfs' % _api_version, method='POST',
+        response = client.do_request(url='%s/vnfs' % _api_version, method='POST',
                                      body=json_body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
@@ -644,7 +654,7 @@ def destroy_nfv(client, vnf_id):
     :return: True if successful
     """
     try:
-        response = client.do_request(url='/%s/vnfs/%s' % (_api_version, vnf_id), method='DELETE')
+        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='DELETE')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('destroy_nfv: Client (%s of %s) authentication error: %s' % (client.username,

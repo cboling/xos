@@ -5,7 +5,7 @@
 OPENSTACK_USER = 'admin'
 OPENSTACK_PASSWORD = 'devstack'
 OPENSTACK_TENANT_NAME = 'admin'
-OPENSTACK_AUTH_URL = 'http://localhost:35357/v2.0'
+OPENSTACK_AUTH_URL = 'http://localhost:5000/v2.0'
 OPENSTACK_SERVICE_TYPE = 'nfv-orchestration'
 
 class ControllerTest:

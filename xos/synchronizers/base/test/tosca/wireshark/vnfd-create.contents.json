@@ -1,3 +1,9 @@
+#
+# JSON contents of SUCCESSFUL manual CLI tacker vnfd-create command:
+#
+#    vnfd-create --tenant-id 0b068bbb3acd4585817c3679d11d78ed --vnfd-file cirros.yaml \
+#                --name "Cirros Manual Test"
+#
 {
     "vnfd": {
         "service_types": [

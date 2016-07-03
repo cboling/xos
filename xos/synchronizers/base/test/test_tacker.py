@@ -24,7 +24,8 @@ _test_credentials = {
     'password': OPENSTACK_PASSWORD,
     'tenant': OPENSTACK_TENANT_NAME,
     'service_type': OPENSTACK_SERVICE_TYPE,
-    'auth_url': 'http://172.22.8.227:35357/v2.0',      # Some various configs for testing,
+    # 'auth_url': 'http://172.22.8.227:35357/v2.0',      # Some various configs for testing,
+    'auth_url': 'http://192.168.1.121:5000/v2.0',
     # 'auth_url': OPENSTACK_AUTH_URL,
 }
 # TODO: Currently, only the new TOSCA parser (Mitaka, Newton) is supported
@@ -104,7 +105,10 @@ def _template_path(filename, old_parser=_use_old_parser):
 
 def _onboard_vnfd(client, filepath, vnfd_name=None, tenant_name=_test_credentials['tenant']):
     """
-    Onboard a known good VNFD
+    Onboard a known good VNFD.
+
+      Only call this for first checkout of VNFD create and then later when peforming
+      VNF tests
 
     :param client: (HttpClient) Tacker HTTP API client
     :param filepath: (string) VNFD TOSCA File/Template
@@ -112,6 +116,7 @@ def _onboard_vnfd(client, filepath, vnfd_name=None, tenant_name=_test_credential
     :return: (tuple) (name, UUID of installed VNFD) if successful
     """
     return tacker.onboard_vnfd(client, filename=filepath, vnfd_name=vnfd_name,
+                               vnfd_description='Test VNFD: You can delete me if you need to',
                                tenant_name=tenant_name)
 
 
@@ -218,8 +223,8 @@ class VNFDOnboardTest(unittest.TestCase):
         self.assertTrue(self.client is not None)
 
     def tearDown(self):
-        # if self.vnfd_id is not None:
-        #    _vnfd_cleanup(self.client, self.vnfd_id)
+        if self.vnfd_id is not None:
+            _vnfd_cleanup(self.client, self.vnfd_id)
         self.client = None
 
     @debug_on()
@@ -228,11 +233,11 @@ class VNFDOnboardTest(unittest.TestCase):
         _, self.vnfd_id = _onboard_vnfd(self.client, self.template, self.name)
         self.assertIsNotNone(self.vnfd_id)
 
-        # clean = _vnfd_cleanup(self.client, self.vnfd_id)
-        # self.assertTrue(clean)
-        #
-        # if clean:
-        #     self.vnfd_id = None
+        clean = _vnfd_cleanup(self.client, self.vnfd_id)
+        self.assertTrue(clean)
+
+        if clean:
+            self.vnfd_id = None
 
     @debug_on()
     def testBadTemplateFile(self):
@@ -254,6 +259,9 @@ class VNFDOnboardTest(unittest.TestCase):
     #
     #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
     #                       tenant_name=_test_credentials['tenant'] + 'xxxxxx')
+    #
+    # TODO: Test setting of VNFD name and description.  call directly into tacker.onboard_vnfd for most tests
+
 
 
 # class VNFDDestroyTest(unittest.TestCase):
