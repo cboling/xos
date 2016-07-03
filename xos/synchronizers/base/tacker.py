@@ -254,7 +254,8 @@ def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, userna
     :param password: (string) Authentication password
     :param tenant_name: (string) Default tenant name (or UUID) to launch VNFs in     TODO: Verify this param
 
-    :return: (tuple) (name, UUID of installed VNFD) if successful
+    :return: (requests.models.Response) Returned response, see .json() return for more dictionary of response which
+                                        includes: 'name' and 'id' entries
     """
 
     auth = {
@@ -295,8 +296,8 @@ def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, userna
 
     try:
         # pprint.PrettyPrinter(indent=4).pprint(json_body)
-        response = client.do_request(url='%s/vnfds' % _api_version, method='POST',
-                                     body=json_body)
+        response, response_body = client.do_request(url='%s/vnfds' % _api_version, method='POST',
+                                                    body=json_body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('onboard_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -312,9 +313,6 @@ def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, userna
 
     # Check response status
     try:
-        # print 'Response type is %s' % type(response)        # Tuple
-        # print 'Response[0] type is %s' % type(response[0])  # requests.modes.Response
-        pprint.PrettyPrinter(indent=4).pprint(response)
         response.raise_for_status()
 
     except HTTPError as e:
@@ -323,10 +321,10 @@ def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, userna
                                                                                        e.message))
         raise
 
-    return response[0].json()['name'], response[0].json()['id']
+    return response
 
 
-def destroy_nfvd(client, vnfd_id):
+def destroy_vnfd(client, vnfd_id):
     """
     Delete a given VNFD from the catalog
     :param client: (HttpClient) Tacker HTTP API client
@@ -334,7 +332,8 @@ def destroy_nfvd(client, vnfd_id):
     :return: True if successful
     """
     try:
-        response = client.do_request(url='%s/vnfd/%s' % (_api_version, vnfd_id), method='DELETE')
+        # print 'deleting VNFD %s' % vnfd_id
+        response, response_body = client.do_request(url='%s/vnfds/%s' % (_api_version, vnfd_id), method='DELETE')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('destroy_nfvd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -351,7 +350,9 @@ def destroy_nfvd(client, vnfd_id):
     # TODO: Debug this.
     # Check response status
     try:
-        response[0].raise_for_status()
+        # pprint.PrettyPrinter(indent=4).pprint(response)
+        # pprint.PrettyPrinter(indent=4).pprint(response_body)
+        response.raise_for_status()
 
     except HTTPError as e:
         observer_logger.error('destroy_nfvd: Client (%s of %s) Response Failed: %s' % (client.username,
@@ -359,7 +360,7 @@ def destroy_nfvd(client, vnfd_id):
                                                                                        e.message))
         raise
 
-    return True
+    return response.ok
 
 
 def get_vnf_list(client):
