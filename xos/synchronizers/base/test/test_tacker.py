@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import random
 from defaults import *
 from TackerTestClasses import SiteTest
 from synchronizers.base import tacker
@@ -235,7 +236,7 @@ class VNFDOnboardTest(unittest.TestCase):
     @debug_on()
     def testOnboardCirros(self):
         """Verify simple VNFD onboard and destroy works as expected"""
-        _, self.vnfd_id = _onboard_vnfd(self.client, self.template, self.name)
+        _, self.vnfd_id = _onboard_vnfd(self.client, self.template, self.name + '-testOnboard')
         self.assertIsNotNone(self.vnfd_id)
 
         clean = _vnfd_cleanup(self.client, self.vnfd_id)
@@ -248,25 +249,28 @@ class VNFDOnboardTest(unittest.TestCase):
     def testBadTemplateFile(self):
         """Bad template name raises appropriate exception"""
 
-        # self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename=self.template + 'xxxxxx')
-        # self.assertRaises(TypeError, tacker.onboard_vnfd, self.client, filename=None)
-        # self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename='')
+        self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename=self.template + 'xxxxxx')
+        self.assertRaises(TypeError, tacker.onboard_vnfd, self.client, filename=None)
+        self.assertRaises(IOError, tacker.onboard_vnfd, self.client, filename='')
         pass
 
-    # @debug_on()
-    # def testBadCredentials(self):
-    #     """Bad username, password, or tenant raises appropriate exception"""
-    #
-    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
-    #                       username=_test_credentials['user'] + 'xxxxxx')
-    #
-    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
-    #                       password=_test_credentials['password'] + 'xxxxxx')
-    #
-    #     self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
-    #                       tenant_name=_test_credentials['tenant'] + 'xxxxxx')
-    #
-    # TODO: Test setting of VNFD name and description.  call directly into tacker.onboard_vnfd for most tests
+    @debug_on()
+    def testBadCredentials(self):
+        """Bad username, password, or tenant raises appropriate exception"""
+
+        # tacker.onboard_vnfd(self.client, self.template,
+        #                     username=_test_credentials['user'] + 'xxxxxx')
+        # self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+        #                   username=_test_credentials['user'] + 'xxxxxx')
+        #
+        # self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+        #                   password=_test_credentials['password'] + 'xxxxxx')
+        #
+        # self.assertRaises(Unauthorized, tacker.onboard_vnfd, self.client, self.template,
+        #                   tenant_name=_test_credentials['tenant'] + 'xxxxxx')
+        #
+        # TODO: Test setting of VNFD name and description.  call directly into tacker.onboard_vnfd for most tests
+        pass
 
 
 # class VNFDDestroyTest(unittest.TestCase):
@@ -283,33 +287,62 @@ class VNFDOnboardTest(unittest.TestCase):
 #         self.fail('TODO: Implement some tests')
 #
 #
-# class VNFDListTest(unittest.TestCase):
-#     def setUp(self):
-#         self.client = _create_client()
-#         self.assertTrue(self.client is not None)
-#
-#     def tearDown(self):
-#         self.client = None
-#
-#     @debug_on()
-#     def testSomething(self):
-#         """Verify something"""
-#         self.fail('TODO: Implement some tests')
-#
-#
-# class VNFDGetTest(unittest.TestCase):
-#     def setUp(self):
-#         self.client = _create_client()
-#         self.assertTrue(self.client is not None)
-#
-#     def tearDown(self):
-#         self.client = None
-#
-#     def testSomething(self):
-#         """Verify something"""
-#         self.fail('TODO: Implement some tests')
-#
-#
+class VNFDListTest(unittest.TestCase):
+    def setUp(self):
+        self.client = _create_client()
+        self.assertTrue(self.client is not None)
+        self.template = _template_path('cirros.yaml')
+        random.seed()
+        self.name = 'TackerUnitTest-Cirros-vnfdlist-%d' % random.randint(0, 999999999)
+        _, self.vnfd_id =_onboard_vnfd(self.client, self.template, self.name)
+        self.assertIsNotNone(self.vnfd_id)
+
+    def tearDown(self):
+        if self.vnfd_id:
+            self.assertTrue(_vnfd_cleanup(self.client, self.vnfd_id))
+        self.client = None
+
+    @debug_on()
+    def testGetList(self):
+        """Verify VNFD is in the list"""
+
+        result = tacker.get_vnfd_list(self.client)
+
+        desired_result = [item for item in result if item.get('id') == self.vnfd_id]
+        self.assertEqual(len(desired_result), 1)
+        self.assertEqual(desired_result[0]['name'], self.name)
+
+
+class VNFDGetTest(unittest.TestCase):
+    def setUp(self):
+        self.client = _create_client()
+        self.assertTrue(self.client is not None)
+        self.template = _template_path('cirros.yaml')
+        random.seed()
+        self.name = 'TackerUnitTest-Cirros-vnfdget-%d' % random.randint(0, 999999999)
+        _, self.vnfd_id =_onboard_vnfd(self.client, self.template, self.name)
+        self.assertIsNotNone(self.vnfd_id)
+
+    def tearDown(self):
+        if self.vnfd_id:
+            self.assertTrue(_vnfd_cleanup(self.client, self.vnfd_id))
+        self.client = None
+
+    def testGetGoodId(self):
+        """Verify VNFD get by ident"""
+
+        result = tacker.get_nfvd(self.client, self.vnfd_id)
+
+        self.assertEqual(result['id'], self.vnfd_id)
+        self.assertEqual(result['name'], self.name)
+
+    def testGetBadId(self):
+        """Verify VNFD get by ident"""
+
+        self.assertRaises(HTTPError, tacker.get_nfvd, self.client,
+                          self.vnfd_id + 'x')
+
+
 # class SimpleVNFTest(unittest.TestCase):
 #     """
 #     Test that running a known good VNF works.  Used in setup for further VNF tests

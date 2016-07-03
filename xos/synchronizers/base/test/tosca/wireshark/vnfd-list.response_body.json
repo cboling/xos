@@ -1,0 +1,72 @@
+{
+    "vnfds": [
+        {
+            "service_types": [
+                {
+                    "service_type": "vnfd",
+                    "id": "1d47c4c0-97bd-4ecc-83b9-b2ba282fa455"
+                }
+            ],
+            "description": "Test VNFD: You can delete me if you need to",
+            "tenant_id": "0b068bbb3acd4585817c3679d11d78ed",
+            "mgmt_driver": "noop",
+            "infra_driver": "heat",
+            "attributes": {
+                "vnfd": "tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0\\n\\ndescription: Demo example\\n\\nmetadata:\\n  template_name: sample-tosca-vnfd\\n\\ntopology_template:\\n  node_templates:\\n    VDU1:\\n      type: tosca.nodes.nfv.VDU.Tacker\\n      properties:\\n        image: cirros-0.3.4-x86_64-uec\\n        flavor: m1.tiny\\n        availability_zone: nova\\n        mgmt_driver: noop\\n        config: |\\n          param0: key1\\n          param1: key2\\n\\n    CP1:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        management: true\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL1\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP2:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL2\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP3:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL3\\n        - virtualBinding:\\n            node: VDU1\\n\\n    VL1:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net_mgmt\\n        vendor: Tacker\\n\\n    VL2:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net0\\n        vendor: Tacker\\n\\n    VL3:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net1\\n        vendor: Tacker"
+            },
+            "id": "681f487f-b027-4e8a-bc5c-85fea39b09fd",
+            "name": "TackerUnitTest-Cirros-vnfdlist"
+        },
+        {
+            "service_types": [
+                {
+                    "service_type": "vnfd",
+                    "id": "0b6591e3-cde0-49a5-9f90-db14434d9bfa"
+                }
+            ],
+            "description": "test description",
+            "tenant_id": "0b068bbb3acd4585817c3679d11d78ed",
+            "mgmt_driver": "noop",
+            "infra_driver": "heat",
+            "attributes": {
+                "vnfd": "tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0\\n\\ndescription: Demo example\\n\\nmetadata:\\n  template_name: sample-tosca-vnfd\\n\\ntopology_template:\\n  node_templates:\\n    VDU1:\\n      type: tosca.nodes.nfv.VDU.Tacker\\n      properties:\\n        image: cirros-0.3.4-x86_64-uec\\n        flavor: m1.tiny\\n        availability_zone: nova\\n        mgmt_driver: noop\\n        config: |\\n          param0: key1\\n          param1: key2\\n\\n    CP1:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        management: true\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL1\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP2:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL2\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP3:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL3\\n        - virtualBinding:\\n            node: VDU1\\n\\n    VL1:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net_mgmt\\n        vendor: Tacker\\n\\n    VL2:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net0\\n        vendor: Tacker\\n\\n    VL3:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net1\\n        vendor: Tacker\\n\\n"
+            },
+            "id": "852f4e93-9793-4179-ab3f-0cec841dbaec",
+            "name": "Cirros"
+        },
+        {
+            "service_types": [
+                {
+                    "service_type": "vnfd",
+                    "id": "66b6baba-b010-480f-887f-8cb7f34a7a4f"
+                }
+            ],
+            "description": "test 2 description",
+            "tenant_id": "0b068bbb3acd4585817c3679d11d78ed",
+            "mgmt_driver": "noop",
+            "infra_driver": "heat",
+            "attributes": {
+                "vnfd": "tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0\\n\\ndescription: Demo example\\n\\nmetadata:\\n  template_name: sample-tosca-vnfd\\n\\ntopology_template:\\n  node_templates:\\n    VDU1:\\n      type: tosca.nodes.nfv.VDU.Tacker\\n      properties:\\n        image: cirros-0.3.4-x86_64-uec\\n        flavor: m1.tiny\\n        availability_zone: nova\\n        mgmt_driver: noop\\n        config: |\\n          param0: key1\\n          param1: key2\\n\\n    CP1:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        management: true\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL1\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP2:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL2\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP3:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL3\\n        - virtualBinding:\\n            node: VDU1\\n\\n    VL1:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net_mgmt\\n        vendor: Tacker\\n\\n    VL2:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net0\\n        vendor: Tacker\\n\\n    VL3:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net1\\n        vendor: Tacker\\n\\n"
+            },
+            "id": "8ceb614a-1354-45ca-bfea-7a451164bf58",
+            "name": "Cirros2"
+        },
+        {
+            "service_types": [
+                {
+                    "service_type": "vnfd",
+                    "id": "60187b97-59f7-4d89-8331-b6063cbcfa9f"
+                }
+            ],
+            "description": "Test VNFD: You can delete me if you need to",
+            "tenant_id": "0b068bbb3acd4585817c3679d11d78ed",
+            "mgmt_driver": "noop",
+            "infra_driver": "heat",
+            "attributes": {
+                "vnfd": "tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0\\n\\ndescription: Demo example\\n\\nmetadata:\\n  template_name: sample-tosca-vnfd\\n\\ntopology_template:\\n  node_templates:\\n    VDU1:\\n      type: tosca.nodes.nfv.VDU.Tacker\\n      properties:\\n        image: cirros-0.3.4-x86_64-uec\\n        flavor: m1.tiny\\n        availability_zone: nova\\n        mgmt_driver: noop\\n        config: |\\n          param0: key1\\n          param1: key2\\n\\n    CP1:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        management: true\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL1\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP2:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL2\\n        - virtualBinding:\\n            node: VDU1\\n\\n    CP3:\\n      type: tosca.nodes.nfv.CP.Tacker\\n      properties:\\n        anti_spoofing_protection: false\\n      requirements:\\n        - virtualLink:\\n            node: VL3\\n        - virtualBinding:\\n            node: VDU1\\n\\n    VL1:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net_mgmt\\n        vendor: Tacker\\n\\n    VL2:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net0\\n        vendor: Tacker\\n\\n    VL3:\\n      type: tosca.nodes.nfv.VL\\n      properties:\\n        network_name: net1\\n        vendor: Tacker"
+            },
+            "id": "ad5e4de5-7dcc-4007-acfe-0a5718fd569e",
+            "name": "TackerUnitTest-Cirros-vnfdlist"
+        }
+    ]
+}

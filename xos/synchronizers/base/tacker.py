@@ -6,6 +6,14 @@ from tackerclient.client import HTTPClient, construct_http_client
 from tackerclient.common.exceptions import Unauthorized, ConnectionFailed
 from tackerclient.common.exceptions import SslCertificateValidationError
 from requests.exceptions import HTTPError
+import json
+import pprint
+from xos.config import Config, XOS_DIR
+from xos.logger import observer_logger
+from tackerclient.client import HTTPClient, construct_http_client
+from tackerclient.common.exceptions import Unauthorized, ConnectionFailed
+from tackerclient.common.exceptions import SslCertificateValidationError
+from requests.exceptions import HTTPError
 
 try:
     step_dir = Config().observer_steps_dir
@@ -109,7 +117,7 @@ def get_vnfd_list(client):
     """
 
     try:
-        response = client.do_request(url='/%s/vnfds' % _api_version, method='GET')
+        response, response_body = client.do_request(url='/%s/vnfds' % _api_version, method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnfd_list: Client (%s of %s) authentication error: %s' % (client.username,
@@ -126,7 +134,7 @@ def get_vnfd_list(client):
     # Response is a tuple with [0] -> class 'requests.models.response'
     # Check response status
     try:
-        response[0].raise_for_status()
+        response.raise_for_status()
 
     except HTTPError as e:
         observer_logger.error('get_vnfd_list: Client (%s of %s) Response Failed: %s' % (client.username,
@@ -134,7 +142,7 @@ def get_vnfd_list(client):
                                                                                         e.message))
         raise
 
-    return response[0].json()['vnfds']
+    return response.json()['vnfds']
 
 
 def get_nfvd(client, vnfd_id):
@@ -170,7 +178,7 @@ def get_nfvd(client, vnfd_id):
     """
 
     try:
-        response = client.do_request(url='%s/vnfds/%s' % (_api_version, vnfd_id), method='GET')
+        response, response_body = client.do_request(url='%s/vnfds/%s' % (_api_version, vnfd_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnfd: Client (%s of %s) authentication error: %s' % (client.username,
@@ -194,9 +202,7 @@ def get_nfvd(client, vnfd_id):
                                                                                    e.message))
         raise
 
-    json_data = response[0].json()['vnfd']
-
-    return json_data if len(json_data) > 0 else None
+    return response.json()['vnfd']
 
 
 def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, username=None, password=None, tenant_name=None):
@@ -295,7 +301,6 @@ def onboard_vnfd(client, filename, vnfd_name=None, vnfd_description=None, userna
     json_body = json.dumps(body)
 
     try:
-        # pprint.PrettyPrinter(indent=4).pprint(json_body)
         response, response_body = client.do_request(url='%s/vnfds' % _api_version, method='POST',
                                                     body=json_body)
 
@@ -347,7 +352,6 @@ def destroy_vnfd(client, vnfd_id):
                                                                                         e.message))
         raise
 
-    # TODO: Debug this.
     # Check response status
     try:
         # pprint.PrettyPrinter(indent=4).pprint(response)
@@ -376,7 +380,7 @@ def get_vnf_list(client):
     """
 
     try:
-        response = client.do_request(url='%s/vnfs' % _api_version, method='GET')
+        response, response_body = client.do_request(url='%s/vnfs' % _api_version, method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_vnf_list: Client (%s of %s) authentication error: %s' % (client.username,
@@ -393,7 +397,7 @@ def get_vnf_list(client):
     # Response is a tuple with [0] -> class 'requests.models.response'
     # Check response status
     try:
-        response[0].raise_for_status()
+        response.raise_for_status()
 
     except HTTPError as e:
         observer_logger.error('get_vnf_list: Client (%s of %s) Response Failed: %s' % (client.username,
@@ -401,7 +405,7 @@ def get_vnf_list(client):
                                                                                        e.message))
         raise
 
-    return response[0].json()['vnfs']
+    return response.json()['vnfs']
 
 
 def get_vnf(client, vnf_id):
@@ -420,7 +424,7 @@ def get_vnf(client, vnf_id):
     """
 
     try:
-        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='GET')
+        response, response_body = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='GET')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('get_nfv_list: Client (%s of %s) authentication error: %s' % (client.username,
@@ -437,7 +441,7 @@ def get_vnf(client, vnf_id):
     # Response is a tuple with [0] -> class 'requests.models.response'
     # Check response status
     try:
-        response[0].raise_for_status()
+        response.raise_for_status()
 
     except HTTPError as e:
         observer_logger.error('get_nfv_list: Client (%s of %s) Response Failed: %s' % (client.username,
@@ -446,7 +450,7 @@ def get_vnf(client, vnf_id):
         raise
 
     # TODO: Debug this. Document says this is a list of dict (with 1 item) but that does not make sense
-    json_data = response[0].json()['vnf']
+    json_data = response.json()['vnf']
 
     return json_data if len(json_data) > 0 else None
 
@@ -526,8 +530,8 @@ def launch_nfv(client, vnfd_id, param_filename, username=None, password=None, te
     json_body = json.dumps(body)
 
     try:
-        response = client.do_request(url='%s/vnfs' % _api_version, method='POST',
-                                     body=json_body)
+        response, response_body = client.do_request(url='%s/vnfs' % _api_version, method='POST',
+                                                    body=json_body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('launch_nfv: Client (%s of %s) authentication error: %s' % (client.username,
@@ -551,7 +555,7 @@ def launch_nfv(client, vnfd_id, param_filename, username=None, password=None, te
                                                                                      e.message))
         raise
 
-    return response[0].json()['vnf']
+    return response.json()['vnf']
 
 
 def update_nfv(client, vnf_id, config_filename, username=None, password=None, tenant_name=None):
@@ -619,8 +623,8 @@ def update_nfv(client, vnf_id, config_filename, username=None, password=None, te
     json_body = json.dumps(body)
 
     try:
-        response = client.do_request(url='%s/vnfs' % _api_version, method='POST',
-                                     body=json_body)
+        response, response_body = client.do_request(url='%s/vnfs' % _api_version, method='POST',
+                                                    body=json_body)
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('update_nfv: Client (%s of %s) authentication error: %s' % (client.username,
@@ -644,7 +648,7 @@ def update_nfv(client, vnf_id, config_filename, username=None, password=None, te
                                                                                      e.message))
         raise
 
-    return response[0].json()['vnf']
+    return response.json()['vnf']
 
 
 def destroy_nfv(client, vnf_id):
@@ -655,7 +659,7 @@ def destroy_nfv(client, vnf_id):
     :return: True if successful
     """
     try:
-        response = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='DELETE')
+        response, response_body = client.do_request(url='%s/vnfs/%s' % (_api_version, vnf_id), method='DELETE')
 
     except (Unauthorized, SslCertificateValidationError) as e:
         observer_logger.error('destroy_nfv: Client (%s of %s) authentication error: %s' % (client.username,
@@ -672,7 +676,7 @@ def destroy_nfv(client, vnf_id):
     # Response is a tuple with [0] -> class 'requests.models.response'
     # Check response status
     try:
-        response[0].raise_for_status()
+        response.raise_for_status()
 
     except HTTPError as e:
         observer_logger.error('destroy_nfv: Client (%s of %s) Response Failed: %s' % (client.username,
@@ -681,4 +685,4 @@ def destroy_nfv(client, vnf_id):
         raise
 
     # TODO: Debug this.
-    return True
+    return response.ok
