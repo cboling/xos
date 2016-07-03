@@ -1,0 +1,72 @@
+#
+# Here is the touched-up wireshark decode of the port 9890 POST request to create a VNFD
+#
+No.     Time           Source                Destination           Protocol Length Info
+     15 0.129752000    192.168.1.144         192.168.1.121         HTTP     2059   POST /v1.0/vnfds.json HTTP/1.1  (application/json)
+
+Frame 15: 2059 bytes on wire (16472 bits), 2059 bytes captured (16472 bits) on interface 0
+Ethernet II, Src: CadmusCo_7e:87:ff (08:00:27:7e:87:ff), Dst: CadmusCo_ac:7e:fe (08:00:27:ac:7e:fe)
+Internet Protocol Version 4, Src: 192.168.1.144 (192.168.1.144), Dst: 192.168.1.121 (192.168.1.121)
+Transmission Control Protocol, Src Port: 41518 (41518), Dst Port: 9890 (9890), Seq: 1, Ack: 1, Len: 1993
+    Source port: 41518 (41518)
+    Destination port: 9890 (9890)
+    [Stream index: 1]
+    Sequence number: 1    (relative sequence number)
+    [Next sequence number: 1994    (relative sequence number)]
+    Acknowledgment number: 1    (relative ack number)
+    Header length: 32 bytes
+    Flags: 0x018 (PSH, ACK)
+    Window size value: 229
+    [Calculated window size: 29312]
+    [Window size scaling factor: 128]
+    Checksum: 0x8c49 [validation disabled]
+    Options: (12 bytes), No-Operation (NOP), No-Operation (NOP), Timestamps
+    [SEQ/ACK analysis]
+Hypertext Transfer Protocol
+    POST /v1.0/vnfds.json HTTP/1.1\r\n
+        [Expert Info (Chat/Sequence): POST /v1.0/vnfds.json HTTP/1.1\r\n]
+            [Message: POST /v1.0/vnfds.json HTTP/1.1\r\n]
+            [Severity level: Chat]
+            [Group: Sequence]
+        Request Method: POST
+        Request URI: /v1.0/vnfds.json
+        Request Version: HTTP/1.1
+    Host: 192.168.1.121:9890\r\n
+    Content-Length: 1716\r\n
+        [Content length: 1716]
+    Accept-Encoding: gzip, deflate\r\n
+    Accept: application/json\r\n
+    X-Auth-Token: 3428a8c1771948bd80588475de6e2ed6\r\n
+    Connection: keep-alive\r\n
+    User-Agent: python-tackerclient\r\n
+    Content-Type: application/json\r\n
+    \r\n
+    [Full request URI: http://192.168.1.121:9890/v1.0/vnfds.json]
+    [HTTP request 1/1]
+    [Response in frame: 17]
+JavaScript Object Notation: application/json
+
+0000  08 00 27 ac 7e fe 08 00 27 7e 87 ff 08 00 45 00   ..'.~...'~....E.
+0010  07 fd a4 f9 40 00 40 06 09 a8 c0 a8 01 90 c0 a8   ....@.@.........
+0020  01 79 a2 2e 26 a2 68 6a 70 e5 09 bb ed 1e 80 18   .y..&.hjp.......
+0030  00 e5 8c 49 00 00 01 01 08 0a 01 4d d4 13 07 62   ...I.......M...b
+0040  60 3f 50 4f 53 54 20 2f 76 31 2e 30 2f 76 6e 66   `?POST /v1.0/vnf
+0050  64 73 2e 6a 73 6f 6e 20 48 54 54 50 2f 31 2e 31   ds.json HTTP/1.1
+0060  0d 0a 48 6f 73 74 3a 20 31 39 32 2e 31 36 38 2e   ..Host: 192.168.
+0070  31 2e 31 32 31 3a 39 38 39 30 0d 0a 43 6f 6e 74   1.121:9890..Cont
+0080  65 6e 74 2d 4c 65 6e 67 74 68 3a 20 31 37 31 36   ent-Length: 1716
+0090  0d 0a 41 63 63 65 70 74 2d 45 6e 63 6f 64 69 6e   ..Accept-Encodin
+00a0  67 3a 20 67 7a 69 70 2c 20 64 65 66 6c 61 74 65   g: gzip, deflate
+00b0  0d 0a 41 63 63 65 70 74 3a 20 61 70 70 6c 69 63   ..Accept: applic
+00c0  61 74 69 6f 6e 2f 6a 73 6f 6e 0d 0a 58 2d 41 75   ation/json..X-Au
+00d0  74 68 2d 54 6f 6b 65 6e 3a 20 33 34 32 38 61 38   th-Token: 3428a8
+00e0  63 31 37 37 31 39 34 38 62 64 38 30 35 38 38 34   c1771948bd805884
+00f0  37 35 64 65 36 65 32 65 64 36 0d 0a 43 6f 6e 6e   75de6e2ed6..Conn
+0100  65 63 74 69 6f 6e 3a 20 6b 65 65 70 2d 61 6c 69   ection: keep-ali
+0110  76 65 0d 0a 55 73 65 72 2d 41 67 65 6e 74 3a 20   ve..User-Agent:
+0120  70 79 74 68 6f 6e 2d 74 61 63 6b 65 72 63 6c 69   python-tackercli
+0130  65 6e 74 0d 0a 43 6f 6e 74 65 6e 74 2d 54 79 70   ent..Content-Typ
+0140  65 3a 20 61 70 70 6c 69 63 61 74 69 6f 6e 2f 6a   e: application/j
+0150  73 6f 6e 0d 0a 0d 0a 7b 22 76 6e 66 64 22 3a 20   son....
+
+{"vnfd": {"service_types": [{"service_type": "vnfd"}], "name": "Cirros Manual Test", "tenant_id": "0b068bbb3acd4585817c3679d11d78ed", "mgmt_driver": "noop", "infra_driver": "heat", "attributes": {"vnfd": "tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0\n\ndescription: Demo example\n\nmetadata:\n  template_name: sample-tosca-vnfd\n\ntopology_template:\n  node_templates:\n    VDU1:\n      type: tosca.nodes.nfv.VDU.Tacker\n      properties:\n        image: cirros-0.3.4-x86_64-uec\n        flavor: m1.tiny\n        availability_zone: nova\n        mgmt_driver: noop\n        config: |\n          param0: key1\n          param1: key2\n\n    CP1:\n      type: tosca.nodes.nfv.CP.Tacker\n      properties:\n        management: true\n        anti_spoofing_protection: false\n      requirements:\n        - virtualLink:\n            node: VL1\n        - virtualBinding:\n            node: VDU1\n\n    CP2:\n      type: tosca.nodes.nfv.CP.Tacker\n      properties:\n        anti_spoofing_protection: false\n      requirements:\n        - virtualLink:\n            node: VL2\n        - virtualBinding:\n            node: VDU1\n\n    CP3:\n      type: tosca.nodes.nfv.CP.Tacker\n      properties:\n        anti_spoofing_protection: false\n      requirements:\n        - virtualLink:\n            node: VL3\n        - virtualBinding:\n            node: VDU1\n\n    VL1:\n      type: tosca.nodes.nfv.VL\n      properties:\n        network_name: net_mgmt\n        vendor: Tacker\n\n    VL2:\n      type: tosca.nodes.nfv.VL\n      properties:\n        network_name: net0\n        vendor: Tacker\n\n    VL3:\n      type: tosca.nodes.nfv.VL\n      properties:\n        network_name: net1\n        vendor: Tacker"}}}
