@@ -21,6 +21,7 @@
     * @returns {boolean} If the string match an email format
     **/
 
+
     this._isEmail = (text) => {
       var re = /(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
       return re.test(text);
@@ -59,7 +60,7 @@
       }
 
       // if null return string
-      if(typeof value === 'string' || value === null){
+      if(angular.isString(value) || value === null){
         return 'text';
       }
 
@@ -81,7 +82,8 @@
     *   'field-name': {
     *     label: 'Label',
     *     type: 'number', //typeof field
-    *     validators: {} // see xosForm for more details
+    *     validators: {}, // see xosForm for more details
+    *     hint: 'A Custom hint for the field'
     *   }
     * }
     * ```
@@ -89,7 +91,7 @@
 
     this.buildFormStructure = (modelField, customField, model) => {
 
-      modelField = Object.keys(modelField).length > 0 ? modelField : customField; //if no model field are provided, check custom
+      modelField = angular.extend(modelField, customField);
       customField = customField || {};
 
       return _.reduce(Object.keys(modelField), (form, f) => {
@@ -97,9 +99,16 @@
         form[f] = {
           label: (customField[f] && customField[f].label) ? `${customField[f].label}:` : LabelFormatter.format(f),
           type: (customField[f] && customField[f].type) ? customField[f].type : this._getFieldFormat(model[f]),
-          validators: (customField[f] && customField[f].validators) ? customField[f].validators : {}
+          validators: (customField[f] && customField[f].validators) ? customField[f].validators : {},
+          hint: (customField[f] && customField[f].hint)? customField[f].hint : '',
         };
 
+        if(customField[f] && customField[f].options){
+          form[f].options = customField[f].options;
+        }
+        if(customField[f] && customField[f].properties){
+          form[f].properties = customField[f].properties;
+        }
         if(form[f].type === 'date'){
           model[f] = new Date(model[f]);
         }

@@ -31,24 +31,24 @@
         rootScope = $rootScope;
       }));
 
-      it('should throw an error if no config is specified', inject(($compile, $rootScope) => {
+      it('should throw an error if no config is specified', () => {
         function errorFunctionWrapper(){
           compileElement();
         }
         expect(errorFunctionWrapper).toThrow(new Error('[xosTable] Please provide a configuration via the "config" attribute'));
-      }));
+      });
 
-      it('should throw an error if no config columns are specified', inject(($compile, $rootScope) => {
+      it('should throw an error if no config columns are specified', () => {
         function errorFunctionWrapper(){
           // setup the parent scope
-          scope = $rootScope.$new();
+          scope = rootScope.$new();
           scope.config = 'green';
           compileElement();
         }
         expect(errorFunctionWrapper).toThrow(new Error('[xosTable] Please provide a columns list in the configuration'));
-      }));
+      });
 
-      describe('when basicly configured', function() {
+      describe('when basically configured', function() {
 
         beforeEach(inject(function ($compile, $rootScope) {
 
@@ -124,15 +124,22 @@
                     label: 'Label 1',
                     prop: 'label-1',
                     type: 'boolean'
+                  },
+                  {
+                    label: 'Label 2',
+                    prop: 'label-2',
+                    type: 'boolean'
                   }
                 ]
               };
               scope.data = [
                 {
-                  'label-1': true
+                  'label-1': true,
+                  'label-2': 1
                 },
                 {
-                  'label-1': false
+                  'label-1': false,
+                  'label-2': 0
                 }
               ];
               compileElement();
@@ -155,6 +162,30 @@
                 let td1 = $(element).find('table tbody tr td')[0];
                 expect(td1).toContainElement('select');
                 expect(td1).not.toContainElement('input');
+              });
+
+              it('should correctly filter results', () => {
+                isolatedScope.query = {
+                  'label-1': false
+                };
+                scope.$digest();
+                expect(isolatedScope.query['label-1']).toBeFalsy();
+                var tr = $(element).find('tbody:last-child > tr');
+                var icon = $(tr[0]).find('td i');
+                expect(tr.length).toEqual(1);
+                expect(icon).toHaveClass('glyphicon-remove');
+              });
+
+              it('should correctly filter results if the field is in the form of 0|1', () => {
+                isolatedScope.query = {
+                  'label-2': false
+                };
+                scope.$digest();
+                expect(isolatedScope.query['label-1']).toBeFalsy();
+                var tr = $(element).find('tbody:last-child > tr');
+                var icon = $(tr[0]).find('td i');
+                expect(tr.length).toEqual(1);
+                expect(icon).toHaveClass('glyphicon-remove');
               });
             });
           });
@@ -190,6 +221,7 @@
                 {categories: ['Film', 'Music']}
               ];
               scope.config = {
+                filter: 'field',
                 columns: [
                   {
                     label: 'Categories',
@@ -201,8 +233,13 @@
               compileElement();
             });
             it('should render a comma separated list', () => {
-              let td1 = $(element).find('tbody tr:first-child')[0];
+              let td1 = $(element).find('tbody:last-child tr:first-child')[0];
               expect($(td1).text().trim()).toEqual('Film, Music');
+            });
+
+            it('should not render the filter field', () => {
+              let filter = $(element).find('tbody tr td')[0];
+              expect($(filter)).not.toContainElement('input');
             });
           });
 
@@ -217,6 +254,7 @@
                 }
               ];
               scope.config = {
+                filter: 'field',
                 columns: [
                   {
                     label: 'Categories',
@@ -228,7 +266,7 @@
               compileElement();
             });
             it('should render a list of key-values', () => {
-              let td = $(element).find('tbody tr:first-child')[0];
+              let td = $(element).find('tbody:last-child tr:first-child')[0];
               let ageLabel = $(td).find('dl dt')[0];
               let ageValue = $(td).find('dl dd')[0];
               let heightLabel = $(td).find('dl dt')[1];
@@ -237,6 +275,11 @@
               expect($(ageValue).text().trim()).toEqual('20');
               expect($(heightLabel).text().trim()).toEqual('height');
               expect($(heightValue).text().trim()).toEqual('50');
+            });
+
+            it('should not render the filter field', () => {
+              let filter = $(element).find('tbody tr td')[0];
+              expect($(filter)).not.toContainElement('input');
             });
           });
 
@@ -249,6 +292,7 @@
                 {categories: ['Film', 'Music']}
               ];
               scope.config = {
+                filter: 'field',
                 columns: [
                   {
                     label: 'Categories',
@@ -299,10 +343,16 @@
             });
 
             it('should format data using the formatter property', () => {
-              let td1 = $(element).find('tbody tr:first-child')[0];
+              let td1 = $(element).find('tbody:last-child tr:first-child')[0];
               expect($(td1).text().trim()).toEqual('Formatted Content');
               // the custom formatted should receive the entire object, otherwise is not so custom
               expect(formatterFn).toHaveBeenCalledWith({categories: ['Film', 'Music']});
+            });
+
+            it('should not render the filter field', () => {
+              // displayed value is different from model val, filter would not work
+              let filter = $(element).find('tbody tr td')[0];
+              expect($(filter)).not.toContainElement('input');
             });
           });
 

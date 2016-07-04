@@ -9,7 +9,8 @@ sys.path.append("/opt/xos")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xos.settings")
 import django
 from core.models import *
-from services.cord.models import *
+from services.volt.models import *
+from services.vsg.models import *
 from services.vtr.models import *
 from django.contrib.auth import authenticate, login
 from django.core.exceptions import PermissionDenied
@@ -99,7 +100,7 @@ def createTestSubscriber():
     print 'vRouter created'
 
     # Site
-    site = Site.objects.get(name='MySite')
+    site = Site.objects.get(name='mysite')
 
     # vSG service
     vsg_service = VSGService()

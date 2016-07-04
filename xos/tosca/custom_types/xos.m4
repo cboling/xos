@@ -6,6 +6,55 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 include(macros.m4)
 
 node_types:
+    tosca.nodes.XOS:
+        derived_from: tosca.nodes.Root
+        description: The root of XOS
+        properties:
+            xos_base_props
+            ui_port:
+                type: integer
+                required: false
+                description: TCP port of user interface
+            bootstrap_ui_port:
+                type: integer
+                required: false
+                descrption: TCP port of bootstrap user interface
+            docker_project_name:
+                type: string
+                required: false
+                description: Docker project name
+            db_container_name:
+                type: string
+                required: false
+                description: Database container name
+            source_ui_image:
+                type: string
+                required: false
+                description: Source UI docker image name
+            enable_build:
+                type: boolean
+                required: false
+                description: True if XOS build should be enabled
+            frontend_only:
+                type: boolean
+                required: false
+                description: True if XOS should not start synchronizer containers
+
+
+    tosca.nodes.XOSVolume:
+        derived_from: tosca.nodes.Root
+        description: A volume that should be attached to the XOS docker container
+        properties:
+            xos_base_props
+            host_path:
+                type: string
+                required: false
+                description: path of resource on host
+            read_only:
+                type: boolean
+                required: false
+                description: True if mount read only
+
     tosca.nodes.Service:
         derived_from: tosca.nodes.Root
         description: >
@@ -16,6 +65,84 @@ node_types:
         properties:
             xos_base_props
             xos_base_service_props
+
+    tosca.nodes.ServiceController:
+        derived_from: tosca.nodes.Root
+        description: >
+            An XOS Service Controller.
+        properties:
+            xos_base_props
+            base_url:
+                type: string
+                required: false
+                description: Base url, to allow resources to use relative URLs
+            models:
+                type: string
+                required: false
+                description: url of models.py
+            admin:
+                type: string
+                required: false
+                description: url of admin.py
+            admin_template:
+                type: string
+                required: false
+                description: url of admin html template
+            synchronizer:
+                type: string
+                required: false
+                description: url of synchronizer manifest
+            synchronizer_run:
+                type: string
+                required: false
+                description: synchronizer run command
+            synchronizer_config:
+                type: string
+                required: false
+                description: synchronizer config filename
+            tosca_custom_types:
+                type: string
+                required: false
+                description: url of tosca custom_types
+            tosca_resource:
+                type: string
+                required: false
+                description: url of tosca resource
+            rest_service:
+                type: string
+                required: false
+                description: url of REST API service file
+            rest_tenant:
+                type: string
+                required: false
+                description: url of REST API tenant file
+            private_key:
+                type: string
+                required: false
+                description: private key
+            public_key:
+                type: string
+                required: false
+                description: public key
+
+    tosca.nodes.ServiceControllerResource:
+        derived_from: tosca.nodes.Root
+        description: >
+            An XOS Service Resource.
+        properties:
+            xos_base_props
+            kind:
+                type: string
+                required: false
+                description: models, admin, django_library, synchronizer, rest, tosca_custom_types, or tosca_resource
+            format:
+                type: string
+                required: false
+                description: python, manifest, or docker
+            url:
+                type: string
+                required: false
+                description: url of resource, may be relative to base_url or absolute
 
     tosca.nodes.Tenant:
         derived_from: tosca.nodes.Root
@@ -127,6 +254,9 @@ node_types:
             dependencies:
                 type: string
                 required: false
+            install_dependencies:
+                type: string
+                required: false
             rest_onos/v1/network/configuration/:
                 type: string
                 required: false
@@ -141,6 +271,9 @@ node_types:
         properties:
             xos_base_tenant_props
             dependencies:
+                type: string
+                required: false
+            install_dependencies:
                 type: string
                 required: false
             rest_onos/v1/network/configuration/:
@@ -309,6 +442,16 @@ node_types:
                 required: true
                 description: MAC address for this device.
 
+    tosca.nodes.VOLTService:
+        derived_from: tosca.nodes.Root
+        description: >
+            CORD: The vOLT Service
+        capabilities:
+            xos_base_service_caps
+        properties:
+            xos_base_props
+            xos_base_service_props
+
     tosca.nodes.VOLTTenant:
         derived_from: tosca.nodes.Root
         description: >
@@ -324,6 +467,58 @@ node_types:
                 type: string
                 required: false
                 description: c_tag, identifies which subscriber within s_tag
+
+    tosca.nodes.VOLTDevice:
+        derived_from: tosca.nodes.Root
+        description: >
+            CORD: A vOLT Device.
+        properties:
+            xos_base_props
+            openflow_id:
+                type: string
+                required: false
+                description: openflow id
+            driver:
+                type: string
+                required: false
+                description: driver name
+            access_devices:
+                type: string
+                required: false
+                description: list of access devices, in format "uplink vlan", multiple entries separated by commas
+
+# XXX - uncomment if we want access device to be specified as separate Tosca
+# objects, rather than encoding them into VOLTDevice.access_devices
+#    tosca.nodes.AccessDevice:
+#        derived_from: tosca.nodes.Root
+#        description: >
+#            CORD: A vOLT Access Device.
+#        properties:
+#            xos_base_props
+#            uplink:
+#               type: integer
+#               required: false
+#               description: uplink
+#            vlan:
+#               type: integer
+#               required: false
+#               description: vlan
+
+    tosca.nodes.AccessAgent:
+        derived_from: tosca.nodes.Root
+        description: >
+            CORD: A vOLT Access Agent.
+        properties:
+            xos_base_props
+            mac:
+                type: string
+                required: false
+                description: mac address
+            port_mappings:
+                type: string
+                required: false
+                description: list of port mappings, in format "port mac", multiple entries separated by commas
+
 
     tosca.nodes.User:
         derived_from: tosca.nodes.Root
@@ -964,6 +1159,21 @@ node_types:
         derived_from: tosca.relationships.Root
 
     tosca.relationships.TagsObject:
+        derived_from: tosca.relationships.Root
+
+    tosca.relationships.MemberOfDevice:
+        derived_from: tosca.relationships.Root
+
+    tosca.relationships.UsesAgent:
+        derived_from: tosca.relationships.Root
+
+    tosca.relationships.HasResource:
+        derived_from: tosca.relationships.Root
+
+    tosca.relationships.UsedByController:
+        derived_from: tosca.relationships.Root
+
+    tosca.relationships.UsedByXOS:
         derived_from: tosca.relationships.Root
 
     tosca.capabilities.xos.Service:

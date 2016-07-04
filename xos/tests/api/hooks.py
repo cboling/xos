@@ -9,7 +9,8 @@ sys.path.append("/opt/xos")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xos.settings")
 import django
 from core.models import *
-from services.cord.models import *
+from services.volt.models import *
+from services.vsg.models import *
 from services.vtr.models import *
 import urllib2
 import json
@@ -18,7 +19,7 @@ django.setup()
 
 
 def doLogin(username, password):
-    url = "http://127.0.0.1:8000/xoslib/login?username=%s&password=%s" % (username, password)
+    url = "http://127.0.0.1:9999/xoslib/login?username=%s&password=%s" % (username, password)
     res = urllib2.urlopen(url).read()
     parsed = json.loads(res)
     return {'token': parsed['xoscsrftoken'], 'sessionid': parsed['xossessionid']}
@@ -102,7 +103,7 @@ def createTestSubscriber():
     vsg_img = createImage('ubuntu-vcpe4')
 
     # Site
-    site = Site.objects.get(name='MySite')
+    site = Site.objects.get(name='mysite')
 
     # vSG service
     vsg_service = VSGService()
@@ -152,13 +153,6 @@ def createTestSubscriber():
 
     # print 'vcpe network relation added'
 
-    # vbng service
-    vbng_service = VBNGService()
-    vbng_service.name = 'service_vbng'
-    vbng_service.save()
-
-    # print 'vbng_service creater'
-
     # volt tenant
     vt = VOLTTenant(subscriber=subscriber.id, id=1)
     vt.s_tag = "222"
@@ -206,7 +200,7 @@ def createFlavors():
 
 
 def createSlice():
-    site = Site.objects.get(name='MySite')
+    site = Site.objects.get(name='mysite')
     user = User.objects.get(email="padmin@vicci.org")
 
     sl = Slice(id=1)
@@ -237,7 +231,7 @@ def createImage(name):
 
 
 def createNode(deployment):
-    site = Site.objects.get(name='MySite')
+    site = Site.objects.get(name='mysite')
 
     site_deployment = SiteDeployment(id=1)
     site_deployment.site = site

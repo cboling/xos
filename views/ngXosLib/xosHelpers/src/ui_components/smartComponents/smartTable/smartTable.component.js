@@ -218,6 +218,7 @@
           .then((res) => {
 
             if(!res[0]){
+              this.data = res;
               return;
             }
 
@@ -225,7 +226,7 @@
             let props = Object.keys(item);
 
             _.remove(props, p => {
-              return p == 'id' || p == 'validators'
+              return p === 'id' || p === 'validators'
             });
 
             // TODO move out cb,  non sense triggering a lot of times
@@ -241,7 +242,7 @@
                 prop: p
               };
 
-              if(typeof item[p] !== 'string' && typeof item[p] !== 'undefined'){
+              if(angular.isString(item[p]) && typeof item[p] !== 'undefined'){
                 fieldConfig.type = typeof item[p];
               }
 

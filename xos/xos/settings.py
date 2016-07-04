@@ -184,21 +184,20 @@ INSTALLED_APPS = (
     'django_extensions',
     'core',
     'services.hpc',
-    'services.cord',
     'services.mcord',
-    'services.onos',
-    'services.ceilometer',
     'services.requestrouter',
     'services.syndicate_storage',
-    'services.openvpn',
-    'services.vtr',
-    'services.vrouter',
-    'services.vtn',
-    'services.fabric',
     'services.vaosservice',                    # ADTN: Added vAOS service
     'geoposition',
     'rest_framework_swagger',
 )
+
+# add services that were configured by xosbuilder to INSTALLED_APPS
+if os.path.exists("/opt/xos/xos/xosbuilder_app_list"):
+    for line in file("/opt/xos/xos/xosbuilder_app_list").readlines():
+        line = line.strip()
+        if line:
+            INSTALLED_APPS = list(INSTALLED_APPS) + [line]
 
 if DJANGO_VERSION[1] >= 7:
     # if django >= 1.7, then change the admin module
@@ -246,6 +245,8 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },'django.db.backends': {
+            'level': 'WARNING',
         },
     }
 }
@@ -269,3 +270,7 @@ STATISTICS_DRIVER = getattr(config, "statistics_driver", "ceilometer")
 
 # prevents warnings on django 1.7
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# API key for Google Maps, created by zdw on 2016-06-29. Testing only, not for production
+GEOPOSITION_GOOGLE_MAPS_API_KEY = 'AIzaSyBWAHP9mvLqWLRkVqK8o5wMskaIe9w7DaM'
+

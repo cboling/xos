@@ -1,4 +1,4 @@
-﻿{% load admin_static %}{% load suit_tags %}{% load url from future %}
+﻿{% load admin_static %}{% load suit_tags core_tags %}{% load url from future %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
@@ -31,11 +31,6 @@
   <script type="text/javascript" src="{% static 'log4javascript-1.4.6/log4javascript.js' %}"></script>
   <script type="text/javascript" src="{% static 'uploadTextarea.js' %}"></script>
   <script type="text/javascript" src="{% static 'observer_status.js' %}"></script>
-
-  <script
-    src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js"
-    data-apikey="748d877b8b4e211dcd3249c1aa46d263">
-  </script>
 
   <!-- ngXosLib -->
   <script src="{% static 'js/vendor/ngXosVendor.js' %}"></script>
@@ -148,6 +143,7 @@
                     {% endblock %}
 
                     {% if user.is_active and user.is_staff %}
+                    {% notification %}
                       <div id="user-tools">
                         {% trans 'Welcome,' %}
                         <a href="http://{{ request.get_host}}/admin/core/user/{{user.id}}">{{user.email}}</a>

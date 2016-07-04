@@ -10,8 +10,8 @@ from core.models import *
 from django.db import reset_queries
 from synchronizers.base.ansible import *
 from generate.dependency_walker import *
+from diag import update_diag
 
-from time import time
 import json
 import time
 import pdb
@@ -141,6 +141,8 @@ class SyncStep(object):
 
 
     def sync_record(self, o):
+        logger.info("Sync_record called for %s %s" % (o.__class__.__name__, str(o)))
+
         try:
             controller = o.get_controller()
             controller_register = json.loads(controller.backend_register)
@@ -236,9 +238,11 @@ class SyncStep(object):
 
                         self.sync_record(o)
 
-                        if (not run_always):
-                            o.enacted = new_enacted
+#                         if (not run_always):
+#                             o.enacted = new_enacted
 
+                        update_diag(syncrecord_start = time.time(), backend_status="1 - Synced Record")
+                        o.enacted = new_enacted
                         scratchpad = {'next_run':0, 'exponent':0, 'last_success':time.time()}
                         o.backend_register = json.dumps(scratchpad)
                         o.backend_status = "1 - OK"

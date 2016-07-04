@@ -17,8 +17,7 @@
         'name',
         'mail',
         'active',
-        'created',
-        'custom'
+        'created'
       ];
 
       let modelField = {
@@ -26,8 +25,7 @@
         name: {},
         mail: {},
         active: {},
-        created: {},
-        custom: {}
+        created: {}
       };
 
       let model = {
@@ -40,10 +38,19 @@
       };
 
       let customField = {
+        id: {
+          label: 'Id',
+          type: 'number',
+          validators: {
+            required: true
+          },
+          hint: ''
+        },
         custom: {
           label: 'Custom Label',
           type: 'number',
-          validators: {}
+          validators: {},
+          hint: 'Test Hint'
         }
       };
 
@@ -51,32 +58,40 @@
         id: {
           label: 'Id:',
           type: 'number',
-          validators: {}
+          validators: {
+            required: true
+          },
+          hint: ''
         },
         name: {
           label: 'Name:',
           type: 'text',
-          validators: {}
+          validators: {},
+          hint: ''
         },
         mail: {
           label: 'Mail:',
           type: 'email',
-          validators: {}
+          validators: {},
+          hint: ''
         },
         active: {
           label: 'Active:',
           type: 'boolean',
-          validators: {}
+          validators: {},
+          hint: ''
         },
         created: {
           label: 'Created:',
           type: 'date',
-          validators: {}
+          validators: {},
+          hint: ''
         },
         custom: {
           label: 'Custom Label:',
           type: 'number',
-          validators: {}
+          validators: {},
+          hint: 'Test Hint'
         }
       };
 
@@ -145,7 +160,35 @@
 
       describe('when modelField are provided', () => {
         it('should combine modelField and customField in a form object', () => {
-          expect(service.buildFormStructure(modelField, customField, model)).toEqual(formObject);
+          const form = service.buildFormStructure(modelField, customField, model);
+          expect(form).toEqual(formObject);
+        });
+
+        it('should override modelField properties whith customField properties', () => {
+          const customFieldOverride = {
+            id: {
+              hint: 'something',
+              type: 'select',
+              options: [
+                {id: 1, label: 'one'},
+                {id: 2, label: 'two'}
+              ],
+              validators: {
+                required: true
+              }
+            }
+          };
+          const form = service.buildFormStructure({id: {}}, customFieldOverride, model);
+          
+          expect(form).toEqual({
+            id: {
+              label: 'Id:',
+              validators: {required: true},
+              hint: customFieldOverride.id.hint,
+              type: customFieldOverride.id.type,
+              options: customFieldOverride.id.options
+            }
+          });
         });
       });
 
@@ -176,7 +219,33 @@
           },
           custom: {
             label: 'Custom Label',
-            type: 'number'
+            type: 'number',
+            hint: 'Test Hint'
+          },
+          select: {
+            label: 'Select Label',
+            type: 'select',
+            hint: 'Select Hint',
+            options: [
+              {id: 1, label: 'something'}
+            ]
+          },
+          object: {
+            label: 'Object Label',
+            type: 'object',
+            hint: 'Object Hint',
+            properties: {
+              foo: {
+                type: 'string',
+                label: 'FooLabel',
+                validators: {
+                  required: true
+                }
+              },
+              bar: {
+                type: 'number'
+              }
+            }
           }
         };
 
@@ -184,45 +253,80 @@
           id: {
             label: 'Id:',
             type: 'number',
-            validators: {}
+            validators: {},
+            hint: ''
           },
           name: {
             label: 'Name:',
             type: 'text',
-            validators: {}
+            validators: {},
+            hint: ''
           },
           mail: {
             label: 'Mail:',
             type: 'email',
-            validators: {}
+            validators: {},
+            hint: ''
           },
           active: {
             label: 'Active:',
             type: 'boolean',
-            validators: {}
+            validators: {},
+            hint: ''
           },
           created: {
             label: 'Created:',
             type: 'date',
-            validators: {}
+            validators: {},
+            hint: ''
           },
           custom: {
             label: 'Custom Label:',
             type: 'number',
-            validators: {}
+            validators: {},
+            hint: 'Test Hint'
+          },
+          select: {
+            label: 'Select Label:',
+            type: 'select',
+            hint: 'Select Hint',
+            validators: {},
+            options: [
+              {id: 1, label: 'something'}
+            ]
+          },
+          object: {
+            label: 'Object Label:',
+            type: 'object',
+            hint: 'Object Hint',
+            validators: {},
+            properties: {
+              foo: {
+                type: 'string',
+                label: 'FooLabel',
+                validators: {
+                  required: true
+                }
+              },
+              bar: {
+                type: 'number'
+              }
+            }
           }
         };
 
         let empty_model = {5: 'Nan'}
 
         it('should create a form object', () => {
-          let res = service.buildFormStructure(empty_modelField, empty_customFields, empty_model)
+          let res = service.buildFormStructure(empty_modelField, empty_customFields, empty_model);
           expect(res.id).toEqual(empty_formObject.id);
           expect(res.name).toEqual(empty_formObject.name);
           expect(res.mail).toEqual(empty_formObject.mail);
           expect(res.active).toEqual(empty_formObject.active);
           expect(res.created).toEqual(empty_formObject.created);
           expect(res.custom).toEqual(empty_formObject.custom);
+          expect(res.select).toEqual(empty_formObject.select);
+          expect(res.object).toEqual(empty_formObject.object);
           expect(res).toEqual(empty_formObject);
         });
       });
