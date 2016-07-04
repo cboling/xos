@@ -45,6 +45,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
     supervisor \
     tar \
     wget \
+    nano \
+    bash-completion \
  && rm -rf /var/lib/apt/lists/*
 
 # Install python pacakges with pip
@@ -124,6 +126,9 @@ RUN \
     mkdir -p /usr/local/share /bin /etc/ansible
 
 COPY ansible-hosts /etc/ansible/hosts
+
+ENV PYTHONPATH /usr/local/lib/python2.7/site-packages:/usr/lib/python2.7/dist-packages:/opt/xos:/usr/local/lib/python2.7/site-packages/pydevd
+ENV TERM xterm
 
 # For Synchronizer
 # ENV PHANTOMJS_DL_URL http://phantomjs.googlecode.com/files/phantomjs-1.7.0-linux-x86_64.tar.bz2

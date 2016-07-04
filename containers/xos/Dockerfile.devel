@@ -1,4 +1,4 @@
-FROM xosproject/xos-base
+FROM adtran/xos-base
 
 # Include certificates from Openstack
 ADD containers/xos/local_certs.crt /usr/local/share/ca-certificates/local_certs.crt
@@ -14,8 +14,6 @@ EXPOSE 8000
 
 # Set environment variables
 ENV HOME /root
-ENV PYTHONPATH /usr/local/lib/python2.7/site-packages:/usr/lib/python2.7/dist-packages:/opt/xos:/usr/local/lib/python2.7/site-packages/pydevd
-ENV TERM xterm
 
 # Define working directory
 WORKDIR /opt/xos
