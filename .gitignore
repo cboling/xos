@@ -1,3 +1,4 @@
+/xos/configurations/adtn-cord/admin-openrc.sh
 *.orig
 *.pyc
 *.swp
