@@ -4,5 +4,5 @@
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=stack
-export OS_AUTH_URL=http://os09-controller01.test.adtran.com:35357/v2.0
+export OS_AUTH_URL=http://controller.bcsw.net:35357/v2.0
 
