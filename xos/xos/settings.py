@@ -187,7 +187,7 @@ INSTALLED_APPS = (
     'services.mcord',
     'services.requestrouter',
     'services.syndicate_storage',
-    'services.vaosservice',                    # ADTN: Added vAOS service
+    # 'services.vaosservice',                    # ADTN: Added vAOS service
     'geoposition',
     'rest_framework_swagger',
 )

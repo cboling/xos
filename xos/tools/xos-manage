@@ -151,7 +151,7 @@ function makemigrations {
             fi
         done
     fi
-    python ./manage.py makemigrations vaosservice
+    # python ./manage.py makemigrations vaosservice
 }
 
 function remigrate {
