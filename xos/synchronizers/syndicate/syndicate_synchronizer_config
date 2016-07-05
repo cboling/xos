@@ -9,7 +9,7 @@ name=xos
 #password=2uMDYtJK
 user=postgres
 password=password
-host=localhost
+host=xos_db
 port=5432
 
 [api]

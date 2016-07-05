@@ -53,7 +53,8 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': config.db_user,
         'PASSWORD': config.db_password,
-        'HOST': config.db_host,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # 'HOST': config.db_host,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': 'xos_db',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': config.db_port,                      # Set to empty string for default.
     }
 }
