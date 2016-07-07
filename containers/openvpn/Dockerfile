@@ -1,4 +1,4 @@
-FROM       xosproject/xos-synchronizer-openstack
+FROM       adtran/xos-synchronizer-openstack
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
     openvpn
