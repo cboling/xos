@@ -1,3 +1,10 @@
+version: '2'
+
+networks:
+  default:
+    external:
+      name: cordpodbs_default
+
 {% for container_name, container in containers.iteritems() %}
 
 {{ container_name}}:
