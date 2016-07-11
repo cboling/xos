@@ -1,4 +1,4 @@
-FROM       xosproject/xos
+FROM       adtran/xos
 
 # install nodejs
 COPY containers/xos/nodesource.gpg.key /tmp/nodesource.gpg.key

@@ -19,7 +19,7 @@ class XOSBuilder(object):
     SYNC_ALLCONTROLLER_KINDS=["models", "django_library"]
 
     def __init__(self):
-        self.source_sync_image = "xosproject/xos-synchronizer-openstack"
+        self.source_sync_image = "adtran/xos-synchronizer-openstack"
         self.build_dir = "/opt/xos/BUILD/"
 
     # stuff that has to do with downloading
@@ -243,7 +243,7 @@ class XOSBuilder(object):
         file(os.path.join(self.build_dir, dockerfile_fn), "w").write("\n".join(dockerfile)+"\n")
 
         return {"dockerfile_fn": dockerfile_fn,
-                "docker_image_name": "xosproject/xos-synchronizer-%s" % controller.name}
+                "docker_image_name": "adtran/xos-synchronizer-%s" % controller.name}
 
     def create_docker_compose(self):
          xos = XOS.objects.all()[0]
@@ -288,7 +288,7 @@ class XOSBuilder(object):
                          command = 'bash -c "sleep 120; cd /opt/xos/synchronizers/%s; bash ./run.sh"' % c.name
 
                      containers["xos_synchronizer_%s" % c.name] = \
-                                    {"image": "xosproject/xos-synchronizer-%s" % c.name,
+                                    {"image": "adtran/xos-synchronizer-%s" % c.name,
                                      "command": command,
                                      "external_links": ["%s:%s" % (xos.db_container_name, "xos_db")],
                                      #"links": ["xos_db"],

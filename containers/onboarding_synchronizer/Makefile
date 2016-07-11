@@ -1,4 +1,4 @@
-IMAGE_NAME:=xosproject/xos-synchronizer-onboarding
+IMAGE_NAME:=adtran/xos-synchronizer-onboarding
 CONTAINER_NAME:=xos-synchronizer
 NO_DOCKER_CACHE?=false
 
