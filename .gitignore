@@ -25,3 +25,4 @@ xos/configurations/setup/
 migrations/
 onboarding-docker-compose/
 key_import/
+/service-profile/adtn-cord/onboarding-docker-compose/docker-compose.yml
