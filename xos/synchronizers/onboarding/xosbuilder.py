@@ -210,7 +210,7 @@ class XOSBuilder(object):
         file(os.path.join(self.build_dir, dockerfile_fn), "w").write("\n".join(dockerfile)+"\n")
 
         return {"dockerfile_fn": dockerfile_fn,
-                "docker_image_name": "xosproject/xos-ui"}
+                "docker_image_name": "adtran/xos-ui"}
 
     def create_synchronizer_dockerfile(self, controller):
         # bake in the synchronizer from this controller
@@ -261,7 +261,7 @@ class XOSBuilder(object):
 #                             "expose": [5432]}
 
          containers["xos_ui"] = \
-                            {"image": "xosproject/xos-ui",
+                            {"image": "adtran/xos-ui",
                              "command": "python /opt/xos/manage.py runserver 0.0.0.0:%d --insecure --makemigrations" % xos.ui_port,
                              "ports": {"%d"%xos.ui_port : "%d"%xos.ui_port},
                              #"links": ["xos_db"],
