@@ -2,20 +2,20 @@
 #
 # Targets:
 #
-#  `base`   - XOS prerequistie files, no XOS code, builds adtran/xos-base
+#  `base`   - XOS prerequistie files, no XOS code, builds xosproject/xos-base
 #  `build`  - base + XOS code, git pulled in Dockerfile from main repo,
-#             builds adtran/xos
+#             builds xosproject/xos
 #  `custom` - base + XOS code, git pulled in Dockerfile from selectable repo,
-#             builds adtran/xos
-#  `devel`  - base + XOS code from local directory, builds adtran/xos
-#  `test`   - adtran/xos + nodejs testing frameworks, builds
-#             adtran/xos-test
+#             builds xosproject/xos
+#  `devel`  - base + XOS code from local directory, builds xosproject/xos
+#  `test`   - xosproject/xos + nodejs testing frameworks, builds
+#             xosproject/xos-test
 #
 
 NO_DOCKER_CACHE    ?= false
 
 CONTAINER_NAME     ?= xos-server
-IMAGE_NAME         ?= adtran/xos
+IMAGE_NAME         ?= xosproject/xos
 
 XOS_GIT_REPO       ?= git://github.com/open-cloud/xos.git
 XOS_GIT_BRANCH     ?= master
@@ -24,7 +24,7 @@ TOSCA_CONFIG_PATH  ?= /opt/xos/configurations/opencloud/opencloud.yaml
 
 base:
 	sudo docker build --no-cache=${NO_DOCKER_CACHE} --rm \
-	-f Dockerfile.base -t adtran/xos-base .
+	-f Dockerfile.base -t xosproject/xos-base .
 
 build:
 	sudo docker build --no-cache=${NO_DOCKER_CACHE} --rm \
@@ -42,7 +42,7 @@ devel:
 
 test:
 	sudo docker build --no-cache=${NO_DOCKER_CACHE} --rm \
-	-f Dockerfile.test -t adtran/xos-test ../..
+	-f Dockerfile.test -t xosproject/xos-test ../..
 
 run:
 	sudo docker run -d --name ${CONTAINER_NAME} -p 80:8000 \

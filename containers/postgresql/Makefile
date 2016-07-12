@@ -1,4 +1,4 @@
-IMAGE_NAME:=adtran/xos-postgres
+IMAGE_NAME:=xosproject/xos-postgres
 CONTAINER_NAME:=xos-db-postgres
 NO_DOCKER_CACHE?=false
 

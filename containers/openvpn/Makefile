@@ -1,4 +1,4 @@
-IMAGE_NAME:=adtran/xos-openvpn
+IMAGE_NAME:=xosproject/xos-openvpn
 CONTAINER_NAME:=xos-synchronizer
 NO_DOCKER_CACHE?=true
 

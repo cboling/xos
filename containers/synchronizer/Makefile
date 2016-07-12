@@ -1,4 +1,4 @@
-IMAGE_NAME:=adtran/xos-synchronizer-openstack
+IMAGE_NAME:=xosproject/xos-synchronizer-openstack
 CONTAINER_NAME:=xos-synchronizer
 NO_DOCKER_CACHE?=false
 
