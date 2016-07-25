@@ -187,7 +187,7 @@ INSTALLED_APPS = (
     'services.requestrouter',
     'services.syndicate_storage',
     'geoposition',
-    'rest_framework_swagger',
+    # 'rest_framework_swagger',
 )
 
 # add services that were configured by xosbuilder to INSTALLED_APPS

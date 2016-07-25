@@ -1,5 +1,7 @@
 /************************* NAV *************************/
 
+@import "../bootstrap/bootstrap/_variables.scss";
+
 #sidebar-wrapper {
   -webkit-box-shadow: 3px 0px 5px 0px rgba(50, 50, 50, 0.75);
   -moz-box-shadow:    3px 0px 5px 0px rgba(50, 50, 50, 0.75);
@@ -7,6 +9,7 @@
 
   .logo{
     max-width: 100%;
+    margin: $default-spacing auto;
   }
 
   a {
@@ -66,6 +69,56 @@
     }
   }
 
+  li{
+    a {
+      transition: all .5s ease-in-out;
+    }
+    ul.dashboard-list{
+      padding-left: $default-spacing;
+      li{
+        list-style: none;
+        position: relative;
+        margin-top: $default-spacing / 4;
+        margin-bottom: $default-spacing / 4;
+        margin-left: $default-spacing;
+
+        &:before {
+          display: inline-block;
+          font-size: 2em;
+          font-weight: 200;
+          position: absolute;
+          top: 15px;
+          left: -15px;
+          line-height: 0;
+          content: '-';
+          background-color: $nav-pills-active-link-hover-bg;
+        }
+        // Actual tabs (as links)
+        > a {
+          cursor: pointer;
+          display: block;
+          padding: 5px 0px;
+          margin-right: 0;
+          border-radius: $nav-pills-border-radius;
+          > img {
+            width:20px;
+          }
+          &:hover,&:focus  {
+            padding-left: 15px;
+            text-decoration: none;
+            background-color: $nav-link-hover-bg;
+          }
+        }
+
+        // Active state, and its :hover to override normal :hover
+        &.active > a {
+          padding-left: 15px;
+          color: $nav-pills-active-link-hover-color;
+          background-color: lighten($nav-pills-active-link-hover-bg, 5%);
+        }
+      }
+    }
+  }
   [class^="icon-"]{
     background-position: left center;
     width:22px;

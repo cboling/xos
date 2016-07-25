@@ -12,7 +12,7 @@ angular.module('xos.tenant')
     bindToController: true,
     controllerAs: 'cs',
     templateUrl: 'templates/createslice.html',
-    controller: function(Slices, SlicesPlus, Sites, Images, $stateParams, $http, $state, $q, XosUserPrefs){
+    controller: function(Slices, SlicesPlus, Sites, Images, $stateParams, $http, $state, $q, XosUserPrefs,_){
       this.config = {
         exclude: ['site', 'password', 'last_login', 'mount_data_sets', 'default_flavor', 'creator', 'exposed_ports', 'networks', 'omf_friendly', 'omf_friendly', 'no_sync', 'no_policy', 'lazy_blocked', 'write_protect', 'deleted', 'backend_status', 'backend_register', 'policed', 'enacted', 'updated', 'created', 'validators', 'humanReadableName'],
         formName: 'SliceDetails',
@@ -35,7 +35,7 @@ angular.module('xos.tenant')
             label: 'Save and continue editing',
             icon: 'ok', // refers to bootstraps glyphicon
             cb: (model, form) => { // receive the model
-              saveform(model,form);
+              saveform(model, form);
             },
             class: 'primary'
           },
@@ -43,8 +43,8 @@ angular.module('xos.tenant')
             label: 'Save and add another',
             icon: 'ok', // refers to bootstraps glyphicon
             cb: (model, form) => {
-              saveform(model,form).then(()=> {
-                $state.go('createslice',{site : this.model.site,id : ''});
+              saveform(model, form).then(()=> {
+                $state.go('createslice', { site: this.model.site, id: ''});
               });
             },
             class: 'primary'
@@ -65,7 +65,16 @@ angular.module('xos.tenant')
             type: 'string',
             hint: 'The Name of the Slice',
             validators: {
-              required: true
+              required: true,
+              custom: (value)=>{
+                if(this.model.site){
+                  var selectVal = _.find(this.config.fields.site.options,['id',this.model.site]);
+                  if(selectVal && value){
+                    return (value.toLowerCase().indexOf(selectVal.label.toLowerCase()) === 0);
+                  }
+                }
+                return false;
+              }
             }
           },
           serviceClass: {
@@ -252,10 +261,8 @@ angular.module('xos.tenant')
           }
           pr.then((users) => {
             this.model = users;
-            //data = users;
-            //this.model = this.users;
             this.config.feedback.show = true;
-            deferred.resolve(this.model);
+            deferred.resolve(users);
           })
           .catch((e) => {
             this.config.feedback.show = true;

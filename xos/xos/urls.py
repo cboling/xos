@@ -59,7 +59,6 @@ def redirect_to_apache(request):
 
 urlpatterns = patterns(
     '',
-    url(r'^observer', 'core.views.observer.Observer', name='observer'),
 
     url(r'^mcord', MCordView.as_view(), name='mcord'),
 
@@ -70,7 +69,7 @@ urlpatterns = patterns(
     url(r'^serviceGraph.png', ServiceGraphView.as_view(), name='serviceGraph'),
     url(r'^hpcConfig', 'core.views.hpc_config.HpcConfig', name='hpcConfig'),
 
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    # url(r'^docs/', include('rest_framework_swagger.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
